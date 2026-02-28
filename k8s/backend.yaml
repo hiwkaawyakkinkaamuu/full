@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: backend:latest
+          imagePullPolicy: Never
+          env:
+            - name: DB_HOST
+              value: postgres.default.svc.cluster.local
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: admin
+            - name: DB_PASSWORD
+              value: admin123
+            - name: DB_NAME
+              value: mydb
+            - name: JWT_SECRET
+              value: dev-secret
+            - name: GOOGLE_CLIENT_ID
+              value: YOUR_GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              value: YOUR_GOOGLE_CLIENT_ID
+            - name: GOOGLE_REDIRECT_URL
+              value: "http://uat-youth-team.local/api/auth/google/callback"
+            - name: FRONTEND_BASE_URL
+              value: "http://uat-youth-team.local"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

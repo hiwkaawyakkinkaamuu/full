@@ -1,0 +1,37 @@
+name: Local K8s Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Build Backend Image
+        run: |
+          cd backend
+          docker build -t myproject-backend:latest .
+
+      - name: Build Frontend Image
+        run: |
+          cd frontend
+          docker build -t myproject-frontend:latest .
+
+      - name: Deploy to Local Kubernetes
+        run: |
+          kubectl apply -f k8s/postgres.yaml
+          kubectl apply -f k8s/pgadmin.yaml
+          kubectl apply -f k8s/backend.yaml
+          kubectl apply -f k8s/frontend.yaml
+          kubectl apply -f k8s/ingress.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods
+          kubectl get services
