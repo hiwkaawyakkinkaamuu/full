@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    env_file:
+      - backend/.env
+    environment:
+      POSTGRES_DB: ${DB_NAME:-mydb}
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin123}
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_panel
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  backend:
+<<<<<<< HEAD
+    image: ${DOCKER_USERNAME:-your-dockerhub-username}/p2-final-project-youth-team-backend:latest
+=======
+    image: ${DOCKER_USERNAME}/p2-final-project-youth-team-backend:latest
+>>>>>>> develop
+    env_file:
+      - backend/.env
+    depends_on:
+      - postgres
+
+    ports:
+      - "8080:8080"
+
+  frontend:
+<<<<<<< HEAD
+    image: ${DOCKER_USERNAME:-your-dockerhub-username}/p2-final-project-youth-team-frontend:latest
+=======
+    image: ${DOCKER_USERNAME}/p2-final-project-youth-team-frontend:latest
+>>>>>>> develop
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+
+

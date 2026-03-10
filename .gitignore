@@ -1,0 +1,5 @@
+backend/.env
+k8s/backend.yaml
+k8s/backend-prod.yaml
+backend/uploads/
+node_modules/

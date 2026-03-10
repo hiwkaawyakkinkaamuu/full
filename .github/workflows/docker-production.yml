@@ -1,0 +1,268 @@
+name: Docker Production
+
+on:
+  push:
+<<<<<<< HEAD
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "k8s/**"
+      - ".github/workflows/docker-production.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+=======
+    branches: [main]
+
+  workflow_dispatch:
+>>>>>>> develop
+
+concurrency:
+  group: docker-production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+<<<<<<< HEAD
+  backend-ci:
+    name: Backend (Go) CI
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Build backend
+        run: go build -o main ./main.go
+
+  frontend-ci:
+    name: Frontend (Next.js) CI
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint || true
+
+      - name: Build frontend
+=======
+
+  backend-ci:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+
+      - run: go mod download
+      - run: go test ./...
+      - run: go build -o main ./main.go
+
+
+  frontend-ci:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npm run lint || true
+
+      - name: Build
+>>>>>>> develop
+        env:
+          NEXT_PUBLIC_API_URL: /api
+        run: npm run build
+
+<<<<<<< HEAD
+  build-and-push-prod:
+    name: Build and Push Images (PROD)
+    runs-on: self-hosted
+    needs:
+      - backend-ci
+      - frontend-ci
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: backend
+            context: ./backend
+            dockerfile: ./backend/Dockerfile
+          - service: frontend
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push ${{ matrix.service }} image for PROD
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/p2-final-project-youth-team-${{ matrix.service }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/p2-final-project-youth-team-${{ matrix.service }}:main-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-prod:
+    name: Deploy to Production Kubernetes
+    runs-on: self-hosted
+    needs:
+      - build-and-push-prod
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure namespace
+        run: kubectl get namespace prod || kubectl create namespace prod
+=======
+
+  build-and-push-prod:
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci]
+
+    strategy:
+      matrix:
+        service: [backend, frontend]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login Docker
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build image
+        run: |
+          docker build -t tonglongridz/p2-final-project-youth-team-${{ matrix.service }}:main-${{ github.sha }} ./$(echo ${{ matrix.service }})
+
+      - name: Tag latest
+        run: |
+          docker tag tonglongridz/p2-final-project-youth-team-${{ matrix.service }}:main-${{ github.sha }} \
+          tonglongridz/p2-final-project-youth-team-${{ matrix.service }}:latest
+
+      - name: Push image
+        run: |
+          docker push tonglongridz/p2-final-project-youth-team-${{ matrix.service }}:main-${{ github.sha }}
+          docker push tonglongridz/p2-final-project-youth-team-${{ matrix.service }}:latest
+
+
+  deploy-prod:
+    runs-on: self-hosted
+    needs: build-and-push-prod
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Kubernetes
+        run: |
+          kubectl version --client
+          kubectl get nodes
+
+      - name: Install NGINX Ingress Controller
+        run: |
+          if ! kubectl get ns ingress-nginx >/dev/null 2>&1; then
+            kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+            echo "Installing ingress-nginx..."
+
+            kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=300s
+          else
+            echo "Ingress already installed"
+          fi
+
+      - name: Create namespace
+        run: |
+          kubectl get namespace prod || kubectl create namespace prod
+>>>>>>> develop
+
+      - name: Apply manifests
+        run: |
+          kubectl apply -n prod -f k8s/postgres.yaml
+          kubectl apply -n prod -f k8s/pgadmin.yaml
+          kubectl apply -n prod -f k8s/backend-prod.yaml
+          kubectl apply -n prod -f k8s/frontend.yaml
+          kubectl apply -n prod -f k8s/ingress-prod.yaml
+
+<<<<<<< HEAD
+      - name: Update deployment images
+        run: |
+          kubectl set image -n prod deployment/backend backend=${{ secrets.DOCKER_USERNAME }}/p2-final-project-youth-team-backend:latest
+          kubectl set image -n prod deployment/frontend frontend=${{ secrets.DOCKER_USERNAME }}/p2-final-project-youth-team-frontend:latest
+
+      - name: Rollout restart
+        run: |
+          kubectl rollout restart -n prod deployment/backend
+          kubectl rollout restart -n prod deployment/frontend
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status -n prod deployment/backend
+          kubectl rollout status -n prod deployment/frontend
+=======
+      - name: Update images
+        run: |
+          kubectl set image deployment/backend backend=tonglongridz/p2-final-project-youth-team-backend:main-${{ github.sha }} -n prod
+          kubectl set image deployment/frontend frontend=tonglongridz/p2-final-project-youth-team-frontend:main-${{ github.sha }} -n prod
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment/backend -n prod
+          kubectl rollout status deployment/frontend -n prod
+>>>>>>> develop
+          kubectl get pods -n prod

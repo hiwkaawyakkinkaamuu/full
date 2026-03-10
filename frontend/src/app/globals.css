@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 243, 244, 246; /* ปรับให้เป็นสีเทาอ่อน F3F4F6 เพื่อให้เข้ากับดีไซน์ Dashboard */
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+  font-family: 'Sarabun', sans-serif; /* แนะนำให้เพิ่ม Font ไทยสวยๆ ใน layout.tsx ด้วยครับ */
+}
+
+/* --- Animation Utilities & Custom Styles --- */
+@layer utilities {
+  
+  /* 1. Fade In Up (ใช้ตอนโหลดหน้า) */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 2. Scale Up (ใช้กับ Modal) */
+  .animate-scale-up {
+    animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 3. Fade In ทั่วไป */
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  /* 4. Pulse แบบนุ่มนวล (ใช้กับ Badge สถานะ) */
+  .animate-pulse-soft {
+    animation: pulseSoft 2s infinite;
+  }
+
+  /* 5. Bounce เล็กน้อย (ใช้กับ Icon ตอน Hover) */
+  .animate-bounce-soft {
+    animation: bounceSoft 2s infinite;
+  }
+
+  /* Keyframes Definition */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleUp {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes pulseSoft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes bounceSoft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* Custom Scrollbar (ทำให้ Scrollbar ดูสะอาดตาขึ้นในตารางและ Sidebar) */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1; /* slate-300 */
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8; /* slate-400 */
+  }
+
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+}
