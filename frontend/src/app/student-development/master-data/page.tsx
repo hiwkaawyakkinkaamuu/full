@@ -2,10 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-<<<<<<< HEAD
-=======
-import { api } from "@/lib/axios";
->>>>>>> develop
 import Swal from "sweetalert2";
 
 // ==========================================
@@ -226,11 +222,7 @@ const masterDataService = {
       await new Promise(resolve => setTimeout(resolve, 800));
       return MOCK_FACULTIES;
     }
-<<<<<<< HEAD
     const res = await axios.get(`${API_BASE_URL}/master/faculties`);
-=======
-    const res = await api.get(`${API_BASE_URL}/master/faculties`);
->>>>>>> develop
     return res.data.data;
   },
 
@@ -245,11 +237,7 @@ const masterDataService = {
       await new Promise(resolve => setTimeout(resolve, 800));
       return { ...payload, faculty_id: Date.now(), departments: [] };
     }
-<<<<<<< HEAD
     const res = await axios.post(`${API_BASE_URL}/master/faculties`, payload);
-=======
-    const res = await api.post(`${API_BASE_URL}/master/faculties`, payload);
->>>>>>> develop
     return res.data;
   },
 
@@ -258,11 +246,7 @@ const masterDataService = {
       await new Promise(resolve => setTimeout(resolve, 800));
       return true;
     }
-<<<<<<< HEAD
     await axios.delete(`${API_BASE_URL}/master/faculties/${id}`);
-=======
-    await api.delete(`${API_BASE_URL}/master/faculties/${id}`);
->>>>>>> develop
     return true;
   },
 
@@ -277,11 +261,7 @@ const masterDataService = {
       await new Promise(resolve => setTimeout(resolve, 800));
       return { ...payload, department_id: Date.now() };
     }
-<<<<<<< HEAD
     const res = await axios.post(`${API_BASE_URL}/master/departments`, payload);
-=======
-    const res = await api.post(`${API_BASE_URL}/master/departments`, payload);
->>>>>>> develop
     return res.data;
   },
 
@@ -290,11 +270,7 @@ const masterDataService = {
       await new Promise(resolve => setTimeout(resolve, 800));
       return true;
     }
-<<<<<<< HEAD
     await axios.delete(`${API_BASE_URL}/master/departments/${id}`);
-=======
-    await api.delete(`${API_BASE_URL}/master/departments/${id}`);
->>>>>>> develop
     return true;
   }
 };

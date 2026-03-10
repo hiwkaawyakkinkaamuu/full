@@ -9,12 +9,10 @@ import {
   Search, Award, Users, Mail, ChevronDown, 
   ShieldCheck, AlertTriangle, Sparkles, CheckCircle2,
   Building2, GraduationCap, X, Edit2, Trash2, Plus, MapPin,
-<<<<<<< HEAD
-  ChevronLeft, ChevronRight, Filter
-=======
   ChevronLeft, ChevronRight, Filter, Contact, AlertCircle
->>>>>>> develop
 } from "lucide-react";
+
+import { useAuth } from "@/context/AuthContext";
 
 // ==========================================
 // 0. Configuration
@@ -55,15 +53,10 @@ interface User {
 // --- Validation Schemas ---
 const UserSchema = z.object({
   prefix: z.string().optional(),
-  firstname: z.string().min(1, "กรุณากรอกชื่อจริงหรือชื่อผู้ติดต่อ"),
+  firstname: z.string().optional(), // 🌟 ปรับเป็น optional เพื่อให้เงื่อนไข custom เช็คได้
   lastname: z.string().optional(), 
-<<<<<<< HEAD
-  email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
-  role_id: z.number().min(1, "กรุณาเลือกตำแหน่ง"),
-=======
   email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง กรุณาระบุให้ถูกต้อง (เช่น example@ku.th)"),
-  role_id: z.number().min(1, "กรุณาเลือกตำแหน่ง (Role)"),
->>>>>>> develop
+  role_id: z.number().min(1, "กรุณาเลือกตำแหน่ง"),
   campus_id: z.number().min(1, "กรุณาเลือกวิทยาเขต"),
   password: z.string().optional(),
   confirm_password: z.string().optional(),
@@ -71,36 +64,14 @@ const UserSchema = z.object({
   faculty_id: z.number().optional(),
   department_id: z.number().optional(),
   organization_name: z.string().optional(),
-<<<<<<< HEAD
-  image_path: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (data.role_id !== 8 && (!data.lastname || data.lastname.trim() === "")) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณากรอกนามสกุล", path: ["lastname"] });
-  }
-  if (data.role_id === 1) { 
-    if (!data.student_number || !/^\d{10}$/.test(data.student_number)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "รหัสนิสิตต้องเป็นตัวเลข 10 หลัก", path: ["student_number"] });
-    if (!data.faculty_id) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณาเลือกคณะ", path: ["faculty_id"] });
-    if (!data.department_id) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณาเลือกสาขา", path: ["department_id"] });
-  }
-  if (data.role_id === 2) { 
-    if (!data.faculty_id) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณาเลือกคณะ", path: ["faculty_id"] });
-    if (!data.department_id) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณาเลือกสาขา", path: ["department_id"] });
-  }
-  if (data.role_id === 3 || data.role_id === 4) { 
-    if (!data.faculty_id) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณาเลือกคณะ", path: ["faculty_id"] });
-  }
-  if (data.role_id === 8) { 
-    if (!data.organization_name) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณากรอกชื่อหน่วยงาน", path: ["organization_name"] });
-  }
-  if (data.password || data.confirm_password) {
-      if (data.password !== data.confirm_password) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "รหัสผ่านไม่ตรงกัน", path: ["confirm_password"] });
-      if (data.password && data.password.length < 6) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "รหัสผ่านอย่างน้อย 6 ตัวอักษร", path: ["password"] });
-=======
   organization_type: z.string().optional(),
   organization_location: z.string().optional(),
   organization_phone: z.string().optional(),
   image_path: z.string().optional(),
 }).superRefine((data, ctx) => {
+  if (data.role_id !== 8 && (!data.firstname || data.firstname.trim() === "")) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณากรอกชื่อจริง", path: ["firstname"] });
+  }
   if (data.role_id !== 8 && (!data.lastname || data.lastname.trim() === "")) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "กรุณากรอกนามสกุลให้ครบถ้วน", path: ["lastname"] });
   }
@@ -124,7 +95,6 @@ const UserSchema = z.object({
   if (data.password || data.confirm_password) {
       if (data.password !== data.confirm_password) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน", path: ["confirm_password"] });
       if (data.password && data.password.length < 6) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร", path: ["password"] });
->>>>>>> develop
   }
 });
 
@@ -178,10 +148,6 @@ const Avatar = ({ src, name }: { src?: string, name: string }) => {
   );
 };
 
-<<<<<<< HEAD
-// 🌟 Custom Dropdown Component 
-=======
->>>>>>> develop
 const CustomSelect = ({ value, onChange, options, icon: Icon, placeholder }: any) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -241,9 +207,7 @@ const CustomSelect = ({ value, onChange, options, icon: Icon, placeholder }: any
     );
 };
 
-<<<<<<< HEAD
-=======
-// 🌟 Form Select พร้อมระบบ Error Highlight
+// Form Select พร้อมระบบ Error Highlight
 const FormSelect = ({ value, onChange, options, icon: Icon, placeholder, disabled, id, error }: any) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -309,12 +273,13 @@ const FormSelect = ({ value, onChange, options, icon: Icon, placeholder, disable
     );
 };
 
->>>>>>> develop
 // ==========================================
 // 2. Main Page Component
 // ==========================================
 
 export default function UserManagementPage() {
+  const { user: currentUser } = useAuth(); // ดึงวิทยาเขตของผู้ใช้งานปัจจุบัน
+  
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [campuses, setCampuses] = useState<any[]>([]);
@@ -334,12 +299,8 @@ export default function UserManagementPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [formData, setFormData] = useState<Partial<User>>({});
   const [isSaving, setIsSaving] = useState(false);
-<<<<<<< HEAD
-=======
   
-  // 🌟 เพิ่ม State สำหรับเก็บ Error แต่ละช่อง
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
->>>>>>> develop
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
@@ -357,15 +318,7 @@ export default function UserManagementPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-<<<<<<< HEAD
-      const params: any = {
-        page: currentPage,
-        limit: ITEMS_PER_PAGE
-      };
-      
-=======
       const params: any = { page: currentPage, limit: ITEMS_PER_PAGE };
->>>>>>> develop
       if (debouncedSearch) params.search = debouncedSearch; 
       if (filterRole !== "all") params.role_id = filterRole; 
 
@@ -390,23 +343,48 @@ export default function UserManagementPage() {
       
       const mapped = rawUsers.map((u: any) => {
         const role = rawRoles.find((r: any) => String(r.role_id) === String(u.role_id));
-        const fac = rawFaculties.find((f: any) => String(f.faculty_id) === String(u.faculty_id));
-        const dept = rawDepartments.find((d: any) => String(d.department_id) === String(u.department_id));
+
+        // 🌟 ดึงข้อมูลจาก Nested Object สำหรับหน้า List View ด้วย
+        let fId = u.faculty_id;
+        let dId = u.department_id;
+        let studentNum = u.student_number || "";
+        
+        if (u.role_id === 1 && u.student_data) {
+            fId = u.student_data.faculty_id;
+            dId = u.student_data.department_id;
+            studentNum = u.student_data.student_number;
+        } else if (u.role_id === 2 && u.head_of_department_data) {
+            fId = u.head_of_department_data.faculty_id;
+            dId = u.head_of_department_data.department_id;
+        } else if (u.role_id === 3 && u.associate_dean_data) {
+            fId = u.associate_dean_data.faculty_id;
+        } else if (u.role_id === 4 && u.dean_data) {
+            fId = u.dean_data.faculty_id;
+        }
+
+        const fac = rawFaculties.find((f: any) => String(f.faculty_id) === String(fId));
+        const dept = rawDepartments.find((d: any) => String(d.department_id) === String(dId));
+
+        // ให้หน้า List โชว์ชื่อองค์กร ถ้าเป็น Role 8
+        let dispFirstname = u.firstname || "ไม่มีชื่อ";
+        if (u.role_id === 8 && u.organization_data) {
+            dispFirstname = u.organization_data.organization_name || u.firstname;
+        }
 
         return {
           user_id: u.user_id,
           prefix: u.prefix || "",
-          firstname: u.firstname || "ไม่มีชื่อ",
+          firstname: dispFirstname,
           lastname: u.lastname || "",
           email: u.email || "-",
           role_id: u.role_id || 1,
           role_name_th: role ? role.role_name_th : "ไม่ระบุตำแหน่ง",
           campus_id: u.campus_id,
-          faculty_id: u.faculty_id, 
-          department_id: u.department_id,
+          faculty_id: fId, 
+          department_id: dId,
           faculty_name: fac ? fac.faculty_name : "",
           department_name: dept ? dept.department_name : "",
-          student_number: u.student_number || "",
+          student_number: studentNum,
           image_path: u.image_path || "",
           is_chairman: u.is_chairman || false,
           provider: u.provider
@@ -433,19 +411,6 @@ export default function UserManagementPage() {
     }
   };
 
-<<<<<<< HEAD
-  const handleOpenCreate = () => {
-    setModalMode("create");
-    setFormData({ role_id: 1, campus_id: 1, prefix: "นาย", password: "", confirm_password: "", image_path: "" });
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (user: User) => {
-    setModalMode("edit");
-    setFormData({ ...user, password: "", confirm_password: "" }); 
-    setIsModalOpen(true);
-=======
-  // 🌟 ฟังก์ชันจัดการ Form พร้อมเคลียร์ Error อัตโนมัติเมื่อพิมพ์แก้
   const handleChange = (field: keyof User, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (formErrors[field]) {
@@ -455,7 +420,6 @@ export default function UserManagementPage() {
             return newErrors;
         });
     }
->>>>>>> develop
   };
 
   const handleRoleChange = (roleIdStr: string) => {
@@ -468,24 +432,81 @@ export default function UserManagementPage() {
         prefix: roleId === 8 ? "-" : (prev.prefix === "-" ? "นาย" : prev.prefix),
         lastname: roleId === 8 ? "-" : prev.lastname,
       }));
-<<<<<<< HEAD
-=======
-      setFormErrors({}); // เคลียร์ Error ทั้งหมดเมื่อเปลี่ยน Role
+      setFormErrors({}); 
   };
 
   const handleOpenCreate = () => {
     setModalMode("create");
-    setFormData({ role_id: 1, campus_id: 1, prefix: "นาย", password: "", confirm_password: "", image_path: "" });
+    setFormData({ 
+        role_id: 1, 
+        campus_id: currentUser?.campus_id || 1,
+        prefix: "นาย", 
+        password: "", 
+        confirm_password: "", 
+        image_path: "" 
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (user: User) => {
-    setModalMode("edit");
-    setFormData({ ...user, password: "", confirm_password: "" }); 
-    setFormErrors({});
-    setIsModalOpen(true);
->>>>>>> develop
+  // 🌟 ปรับแก้การดึงข้อมูลเพื่อโชว์ใน Edit ให้ครบถ้วนจาก API (Student, HOD, Dean, Org)
+  const handleOpenEdit = async (user: User) => {
+    try {
+        const res = await api.get(`/users/info/${user.user_id}`); 
+        const fullUserData = res.data.data || res.data;
+        
+        let resolvedFacultyId = fullUserData.faculty_id ? Number(fullUserData.faculty_id) : undefined;
+        let resolvedDepartmentId = fullUserData.department_id ? Number(fullUserData.department_id) : undefined;
+        let resolvedStudentNumber = fullUserData.student_number || "";
+        
+        let orgName = fullUserData.organization_name || "";
+        let orgType = fullUserData.organization_type || "";
+        let orgPhone = fullUserData.organization_phone || "";
+        let orgLocation = fullUserData.organization_location || "";
+
+        if (fullUserData.role_id === 1 && fullUserData.student_data) {
+            resolvedFacultyId = fullUserData.student_data.faculty_id;
+            resolvedDepartmentId = fullUserData.student_data.department_id;
+            resolvedStudentNumber = fullUserData.student_data.student_number;
+        } else if (fullUserData.role_id === 2 && fullUserData.head_of_department_data) {
+            resolvedFacultyId = fullUserData.head_of_department_data.faculty_id;
+            resolvedDepartmentId = fullUserData.head_of_department_data.department_id;
+        } else if (fullUserData.role_id === 3 && fullUserData.associate_dean_data) {
+            resolvedFacultyId = fullUserData.associate_dean_data.faculty_id;
+        } else if (fullUserData.role_id === 4 && fullUserData.dean_data) {
+            resolvedFacultyId = fullUserData.dean_data.faculty_id;
+        } else if (fullUserData.role_id === 8 && fullUserData.organization_data) {
+            orgName = fullUserData.organization_data.organization_name;
+            orgType = fullUserData.organization_data.organization_type;
+            orgPhone = fullUserData.organization_data.organization_phone;
+            orgLocation = fullUserData.organization_data.organization_location;
+        }
+
+        setModalMode("edit");
+        setFormData({ 
+            ...fullUserData, 
+            role_id: Number(fullUserData.role_id),
+            campus_id: fullUserData.campus_id || currentUser?.campus_id || 1,
+            faculty_id: resolvedFacultyId,
+            department_id: resolvedDepartmentId,
+            student_number: resolvedStudentNumber,
+            organization_name: orgName,
+            organization_type: orgType,
+            organization_phone: orgPhone,
+            organization_location: orgLocation,
+            is_chairman: fullUserData.committee_data?.is_chairman ?? (fullUserData.is_chairman || false),
+            password: "", 
+            confirm_password: "" 
+        }); 
+        setFormErrors({});
+        setIsModalOpen(true);
+    } catch (error) {
+        console.error("Error fetching user details", error);
+        setModalMode("edit");
+        setFormData({ ...user, password: "", confirm_password: "" }); 
+        setFormErrors({});
+        setIsModalOpen(true);
+    }
   };
 
   const handleDelete = async (id: number, name: string) => {
@@ -505,17 +526,8 @@ export default function UserManagementPage() {
       try {
         await api.delete(`/users/${id}`);
         Toast.fire({ icon: 'success', title: 'ลบบัญชีสำเร็จ' });
-<<<<<<< HEAD
-        
-        if (users.length === 1 && currentPage > 1) {
-            setCurrentPage(prev => prev - 1);
-        } else {
-            fetchData();
-        }
-=======
-        if (users.length === 1 && currentPage > 1) setCurrentPage(prev => prev - 1);
+        if (users.length === 1 && currentPage > 1) setCurrentPage(prev => Math.max(prev - 1, 1));
         else fetchData();
->>>>>>> develop
       } catch (error: any) {
         Swal.fire({ icon: 'error', title: 'ลบไม่สำเร็จ', text: 'ระบบหลังบ้านอาจยังไม่รองรับการลบ', customClass: { popup: 'rounded-3xl' } });
       }
@@ -525,19 +537,6 @@ export default function UserManagementPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-<<<<<<< HEAD
-    if (modalMode === 'create' && (!formData.password || formData.password.trim() === '')) {
-       return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากำหนดรหัสผ่านสำหรับบัญชีใหม่', confirmButtonColor: '#0f172a', customClass: { popup: 'rounded-3xl' } });
-    }
-
-    const validation = UserSchema.safeParse(formData);
-    if (!validation.success) {
-      const errorMsg = validation.error.issues[0].message;
-      return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: errorMsg, confirmButtonColor: '#0f172a', customClass: { popup: 'rounded-3xl' } });
-    }
-
-    setIsSaving(true);
-=======
     // 1. ตรวจสอบรหัสผ่านบัญชีใหม่
     if (modalMode === 'create' && (!formData.password || formData.password.trim() === '')) {
        setFormErrors(prev => ({...prev, password: "กรุณากำหนดรหัสผ่านสำหรับการเข้าสู่ระบบ"}));
@@ -562,7 +561,7 @@ export default function UserManagementPage() {
       const firstErrorPath = validation.error.issues[0].path[0] as string;
       const errorMsg = validation.error.issues[0].message;
 
-      // 🌟 แจ้งเตือนและ Scroll หาช่องที่ผิดอัตโนมัติ
+      // แจ้งเตือนและ Scroll หาช่องที่ผิดอัตโนมัติ
       Swal.fire({ 
           icon: 'warning', 
           title: 'ข้อมูลยังไม่สมบูรณ์', 
@@ -574,7 +573,6 @@ export default function UserManagementPage() {
           const errorElement = document.getElementById(`field-${firstErrorPath}`);
           if (errorElement) {
               errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              // ไฮไลต์สั้นๆ ให้สังเกตง่ายขึ้น
               errorElement.classList.add('ring-4', 'ring-red-200');
               setTimeout(() => errorElement.classList.remove('ring-4', 'ring-red-200'), 1500);
           }
@@ -585,14 +583,13 @@ export default function UserManagementPage() {
     setFormErrors({});
     setIsSaving(true);
     
->>>>>>> develop
     try {
       const payload: any = { 
         email: formData.email,
         role_id: formData.role_id,
         campus_id: formData.campus_id,
         prefix: formData.role_id === 8 ? "-" : (formData.prefix || "นาย"),
-        firstname: formData.firstname,
+        firstname: formData.role_id === 8 ? "-" : formData.firstname,
         lastname: formData.role_id === 8 ? "-" : formData.lastname,
       };
 
@@ -620,11 +617,7 @@ export default function UserManagementPage() {
       }
 
       if (modalMode === 'create') {
-<<<<<<< HEAD
-        await api.post(`/auth/register`, payload);
-=======
         await api.post(`/auth/create-account`, payload);
->>>>>>> develop
         Toast.fire({ icon: 'success', title: 'สร้างบัญชีสำเร็จ' });
       } else {
         await api.put(`/users/update/${formData.user_id}`, payload);
@@ -635,15 +628,8 @@ export default function UserManagementPage() {
       fetchData(); 
 
     } catch (error: any) {
-<<<<<<< HEAD
-      console.error("🚨 Error Save:", error.response?.data);
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'บันทึกไม่สำเร็จ', 
-=======
       Swal.fire({ 
         icon: 'error', title: 'บันทึกไม่สำเร็จ', 
->>>>>>> develop
         text: error.response?.data?.message || error.response?.data?.error || 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์', 
         customClass: { popup: 'rounded-3xl' } 
       });
@@ -654,21 +640,12 @@ export default function UserManagementPage() {
 
   const visibleDepartments = departments.filter(d => String(d.faculty_id) === String(formData.faculty_id));
 
-<<<<<<< HEAD
-  // --- เตรียม Options สำหรับ Dropdown ---
-  const dropdownRoleOptions = [
-      { v: "all", l: "แสดงทุกตำแหน่ง" },
-      ...roles.map((r: any) => ({ v: r.role_id, l: r.role_name_th }))
-  ];
-=======
   // --- เตรียม Options ---
   const dropdownRoleOptions = [{ v: "all", l: "แสดงทุกตำแหน่ง" }, ...roles.map((r: any) => ({ v: r.role_id, l: r.role_name_th }))];
   const prefixOptions = PREFIX_OPTIONS.map(p => ({ v: p, l: p }));
   const formRoleOptions = roles.map((r: any) => ({ v: r.role_id, l: r.role_name_th }));
-  const campusOptions = campuses.map((c: any) => ({ v: c.campusID || c.campus_id, l: c.campusName || c.campus_name }));
   const facultyOptions = faculties.map((f: any) => ({ v: f.faculty_id, l: f.faculty_name }));
   const departmentOptions = visibleDepartments.map((d: any) => ({ v: d.department_id, l: d.department_name }));
->>>>>>> develop
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10 pb-36 font-sans text-slate-800 selection:bg-slate-200 selection:text-slate-900 relative">
@@ -701,17 +678,7 @@ export default function UserManagementPage() {
                 />
             </div>
             <div className="w-full md:w-72 relative z-[99]">
-<<<<<<< HEAD
-                <CustomSelect 
-                    value={filterRole} 
-                    onChange={(val: string) => setFilterRole(val)} 
-                    options={dropdownRoleOptions} 
-                    icon={Filter}
-                    placeholder="แสดงทุกตำแหน่ง"
-                />
-=======
                 <CustomSelect value={filterRole} onChange={(val: string) => setFilterRole(val)} options={dropdownRoleOptions} icon={Filter} placeholder="แสดงทุกตำแหน่ง" />
->>>>>>> develop
             </div>
         </div>
 
@@ -734,15 +701,7 @@ export default function UserManagementPage() {
                     {users.map((user, index) => (
                         <motion.div 
                             key={user.user_id} 
-<<<<<<< HEAD
-                            initial={{ opacity: 0, y: 15 }} 
-                            animate={{ opacity: 1, y: 0 }} 
-                            exit={{ opacity: 0, scale: 0.95 }} 
-                            transition={{ duration: 0.2, delay: index * 0.05 }} 
-                            // 🚨 เปลี่ยนจาก motion.tr เป็น motion.div 🚨
-=======
                             initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2, delay: index * 0.05 }} 
->>>>>>> develop
                             className="block group bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                         >
                             <div className="flex flex-col sm:flex-row gap-6">
@@ -751,14 +710,7 @@ export default function UserManagementPage() {
                                   <div className="min-w-0 flex-1 space-y-1">
                                       <div className="flex flex-wrap items-center gap-2">
                                           <h3 className="font-bold text-slate-900 text-[1.1rem] truncate group-hover:text-blue-700 transition-colors">
-<<<<<<< HEAD
-                                            {user.role_id === 8 
-                                              ? `${user.firstname}`
-                                              : `${user.prefix && user.prefix !== "-" ? user.prefix : ''}${user.firstname} ${user.lastname}`.trim()
-                                            }
-=======
                                             {user.role_id === 8 ? `${user.firstname}` : `${user.prefix && user.prefix !== "-" ? user.prefix : ''}${user.firstname} ${user.lastname}`.trim()}
->>>>>>> develop
                                           </h3>
                                           {user.role_id === 1 && user.student_number && (
                                               <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono border border-slate-200 font-bold">{user.student_number}</span>
@@ -778,7 +730,7 @@ export default function UserManagementPage() {
                                       </div>
                                   </div>
                               </div>
-                              <div className="flex sm:flex-col items-center sm:justify-start gap-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-100 sm:pl-5 shrink-0">
+                              <div className="flex sm:flex-col items-center sm:justify-center gap-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-100 sm:pl-5 shrink-0">
                                   <button onClick={() => handleOpenEdit(user)} className="flex-1 sm:flex-none w-full p-2.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm font-bold border border-slate-200 sm:border-transparent sm:bg-transparent"><Edit2 className="w-4 h-4" /><span className="sm:hidden">แก้ไข</span></button>
                                   <button onClick={() => handleDelete(user.user_id, `${user.firstname} ${user.lastname}`)} className="flex-1 sm:flex-none w-full p-2.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm font-bold border border-slate-200 sm:border-transparent sm:bg-transparent"><Trash2 className="w-4 h-4" /><span className="sm:hidden">ลบ</span></button>
                               </div>
@@ -789,36 +741,11 @@ export default function UserManagementPage() {
             )}
         </div>
 
-<<<<<<< HEAD
-        {/* 🌟 Pagination Navigation */}
-        <div className="flex justify-center items-center gap-3 pt-6 pb-4">
-            <button 
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-                disabled={currentPage === 1} 
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-            >
-                <ChevronLeft className="w-5 h-5" />
-            </button>
-            
-            <div className="bg-white px-5 py-2 rounded-xl border border-slate-300 shadow-sm font-bold text-sm text-slate-700">
-                หน้า {currentPage} 
-                {totalPages > 1 && <><span className="text-slate-400 font-normal mx-1">จาก</span> {totalPages}</>}
-            </div>
-            
-            <button 
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-                disabled={currentPage >= totalPages} 
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-            >
-                <ChevronRight className="w-5 h-5" />
-            </button>
-=======
         {/* Pagination Navigation */}
         <div className="flex justify-center items-center gap-3 pt-6 pb-4">
             <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"><ChevronLeft className="w-5 h-5" /></button>
             <div className="bg-white px-5 py-2 rounded-xl border border-slate-300 shadow-sm font-bold text-sm text-slate-700">หน้า {currentPage} {totalPages > 1 && <><span className="text-slate-400 font-normal mx-1">จาก</span> {totalPages}</>}</div>
             <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage >= totalPages} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"><ChevronRight className="w-5 h-5" /></button>
->>>>>>> develop
         </div>
       </div>
 
@@ -827,17 +754,10 @@ export default function UserManagementPage() {
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 font-sans">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-<<<<<<< HEAD
-            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative bg-white w-full max-w-xl h-auto max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-100">
-                
-                {/* Modal Header */}
-                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white z-10 sticky top-0">
-=======
             <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative bg-white w-full max-w-xl h-auto max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-visible border border-slate-100">
                 
                 {/* Modal Header */}
                 <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white z-50 sticky top-0 rounded-t-[2rem]">
->>>>>>> develop
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                           {modalMode === 'create' ? <Plus className="w-5 h-5 text-slate-700" /> : <Edit2 className="w-5 h-5 text-slate-700" />}
@@ -849,108 +769,50 @@ export default function UserManagementPage() {
                 </div>
 
                 {/* Form Body */}
-<<<<<<< HEAD
-                <form id="userForm" onSubmit={handleSave} className="flex-1 overflow-y-auto p-8 space-y-6">
-=======
                 <form id="userForm" onSubmit={handleSave} className="flex-1 overflow-y-auto p-8 space-y-6 scroll-smooth">
->>>>>>> develop
                     
-                    {/* ข้อมูลส่วนตัว */}
-                    <div className="bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100 space-y-5">
-                      <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Users className="w-4 h-4 text-slate-400" /> ข้อมูลส่วนตัวพื้นฐาน</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                            
-<<<<<<< HEAD
-                            {/* ถ้าเป็นองค์กร ซ่อนคำนำหน้า */}
-                            {formData.role_id !== 8 && (
-                                <div className="sm:col-span-4 space-y-1.5">
-                                    <label className="text-[13px] font-bold text-slate-600">คำนำหน้า</label>
-                                    <div className="relative">
-                                      <select className="w-full bg-white border border-slate-300 rounded-lg pl-3 pr-8 py-2.5 text-sm focus:border-slate-400 outline-none transition-all appearance-none" value={formData.prefix || 'นาย'} onChange={e => setFormData({...formData, prefix: e.target.value})}>
-                                        {PREFIX_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
-                                      </select>
-                                      <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ชื่อจริง / ชื่อผู้ติดต่อ */}
-                            <div className={formData.role_id === 8 ? "sm:col-span-12 space-y-1.5" : "sm:col-span-4 space-y-1.5"}>
-                                <label className="text-[13px] font-bold text-slate-600">
-                                    {formData.role_id === 8 ? "ชื่อผู้ติดต่อ / ตัวแทนองค์กร" : "ชื่อจริง"} <span className="text-red-500">*</span>
-                                </label>
-                                <input type="text" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none transition-all" value={formData.firstname || ''} onChange={e => setFormData({...formData, firstname: e.target.value})} placeholder={formData.role_id === 8 ? "ชื่อตัวแทนผู้ประสานงาน" : "สมชาย"} />
-                            </div>
-
-                            {/* ถ้าเป็นองค์กร ซ่อนนามสกุล */}
-                            {formData.role_id !== 8 && (
-                                <div className="sm:col-span-4 space-y-1.5">
-                                    <label className="text-[13px] font-bold text-slate-600">นามสกุล <span className="text-red-500">*</span></label>
-                                    <input type="text" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none transition-all" value={formData.lastname || ''} onChange={e => setFormData({...formData, lastname: e.target.value})} placeholder="ใจดี" />
-=======
-                            {/* คำนำหน้า */}
-                            {formData.role_id !== 8 && (
-                                <div className="sm:col-span-4 space-y-1.5">
-                                    <label className="text-[13px] font-bold text-slate-600">คำนำหน้า</label>
-                                    <FormSelect value={formData.prefix || "นาย"} onChange={(val: string) => handleChange('prefix', val)} options={prefixOptions} />
-                                </div>
-                            )}
-
-                            {/* ชื่อจริง */}
-                            <div className={formData.role_id === 8 ? "sm:col-span-12 space-y-1.5" : "sm:col-span-4 space-y-1.5"}>
-                                <label className="text-[13px] font-bold text-slate-600">{formData.role_id === 8 ? "ชื่อผู้ติดต่อ" : "ชื่อจริง"} <span className="text-red-500">*</span></label>
-                                <input 
-                                  id="field-firstname"
-                                  type="text" 
-                                  className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none transition-all ${formErrors.firstname ? 'border-red-400 ring-2 ring-red-100 bg-red-50/30' : 'border-slate-300 focus:border-slate-400'}`} 
-                                  value={formData.firstname || ''} 
-                                  onChange={e => handleChange('firstname', e.target.value)} 
-                                  placeholder={formData.role_id === 8 ? "ตัวแทนองค์กร" : "สมชาย"} 
-                                />
-                                {formErrors.firstname && <p className="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1"><AlertCircle className="w-3 h-3"/> {formErrors.firstname}</p>}
-                            </div>
-
-                            {/* นามสกุล */}
-                            {formData.role_id !== 8 && (
-                                <div className="sm:col-span-4 space-y-1.5">
-                                    <label className="text-[13px] font-bold text-slate-600">นามสกุล <span className="text-red-500">*</span></label>
-                                    <input 
-                                      id="field-lastname"
-                                      type="text" 
-                                      className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none transition-all ${formErrors.lastname ? 'border-red-400 ring-2 ring-red-100 bg-red-50/30' : 'border-slate-300 focus:border-slate-400'}`} 
-                                      value={formData.lastname || ''} 
-                                      onChange={e => handleChange('lastname', e.target.value)} 
-                                      placeholder="ใจดี" 
-                                    />
-                                    {formErrors.lastname && <p className="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1"><AlertCircle className="w-3 h-3"/> {formErrors.lastname}</p>}
->>>>>>> develop
-                                </div>
-                            )}
+                    {/* 🌟 ปรับปรุงการแสดงผลส่วนข้อมูลส่วนตัว ซ่อนสำหรับองค์กรภายนอก */}
+                    {formData.role_id !== 8 && (
+                      <div className="bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100 space-y-5">
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Users className="w-4 h-4 text-slate-400" /> ข้อมูลส่วนตัวพื้นฐาน</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                              <div className="sm:col-span-4 space-y-1.5">
+                                  <label className="text-[13px] font-bold text-slate-600">คำนำหน้า</label>
+                                  <FormSelect value={formData.prefix || "นาย"} onChange={(val: string) => handleChange('prefix', val)} options={prefixOptions} />
+                              </div>
+                              <div className="sm:col-span-4 space-y-1.5">
+                                  <label className="text-[13px] font-bold text-slate-600">ชื่อจริง <span className="text-red-500">*</span></label>
+                                  <input 
+                                    id="field-firstname"
+                                    type="text" 
+                                    className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none transition-all ${formErrors.firstname ? 'border-red-400 ring-2 ring-red-100 bg-red-50/30' : 'border-slate-300 focus:border-slate-400'}`} 
+                                    value={formData.firstname || ''} 
+                                    onChange={e => handleChange('firstname', e.target.value)} 
+                                    placeholder="สมชาย" 
+                                  />
+                                  {formErrors.firstname && <p className="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1"><AlertCircle className="w-3 h-3"/> {formErrors.firstname}</p>}
+                              </div>
+                              <div className="sm:col-span-4 space-y-1.5">
+                                  <label className="text-[13px] font-bold text-slate-600">นามสกุล <span className="text-red-500">*</span></label>
+                                  <input 
+                                    id="field-lastname"
+                                    type="text" 
+                                    className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none transition-all ${formErrors.lastname ? 'border-red-400 ring-2 ring-red-100 bg-red-50/30' : 'border-slate-300 focus:border-slate-400'}`} 
+                                    value={formData.lastname || ''} 
+                                    onChange={e => handleChange('lastname', e.target.value)} 
+                                    placeholder="ใจดี" 
+                                  />
+                                  {formErrors.lastname && <p className="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1"><AlertCircle className="w-3 h-3"/> {formErrors.lastname}</p>}
+                              </div>
+                        </div>
                       </div>
+                    )}
 
-<<<<<<< HEAD
-                      {/* ข้อมูลพิเศษสำหรับ Organization (Role 8) */}
-                      {formData.role_id === 8 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 mt-2 border-t border-slate-200 border-dashed">
-                              <div className="space-y-1.5">
-                                  <label className="text-[13px] font-bold text-slate-600">ชื่อองค์กร/มูลนิธิ <span className="text-red-500">*</span></label>
-                                  <input type="text" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none" value={formData.organization_name || ''} onChange={e => setFormData({...formData, organization_name: e.target.value})} placeholder="ระบุชื่อองค์กร" />
-                              </div>
-                              <div className="space-y-1.5">
-                                  <label className="text-[13px] font-bold text-slate-600">ประเภทองค์กร</label>
-                                  <input type="text" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none" value={formData.organization_type || ''} onChange={e => setFormData({...formData, organization_type: e.target.value})} placeholder="เช่น เอกชน, รัฐบาล" />
-                              </div>
-                              <div className="space-y-1.5 sm:col-span-2">
-                                  <label className="text-[13px] font-bold text-slate-600">สถานที่ตั้ง</label>
-                                  <input type="text" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none" value={formData.organization_location || ''} onChange={e => setFormData({...formData, organization_location: e.target.value})} placeholder="สถานที่ตั้งองค์กร" />
-                              </div>
-                              <div className="space-y-1.5 sm:col-span-2">
-                                  <label className="text-[13px] font-bold text-slate-600">เบอร์ติดต่อ</label>
-                                  <input type="text" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none" value={formData.organization_phone || ''} onChange={e => setFormData({...formData, organization_phone: e.target.value})} placeholder="เบอร์โทรศัพท์" />
-=======
-                      {/* ข้อมูลองค์กร */}
-                      {formData.role_id === 8 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 mt-2 border-t border-slate-200 border-dashed">
+                    {/* ข้อมูลองค์กร */}
+                    {formData.role_id === 8 && (
+                        <div className="bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100 space-y-5">
+                          <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Building2 className="w-4 h-4 text-slate-400" /> ข้อมูลองค์กรภายนอก</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div className="space-y-1.5 sm:col-span-2">
                                   <label className="text-[13px] font-bold text-slate-600">ชื่อองค์กร/มูลนิธิ <span className="text-red-500">*</span></label>
                                   <input id="field-organization_name" type="text" className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none ${formErrors.organization_name ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-300 focus:border-slate-400'}`} value={formData.organization_name || ''} onChange={e => handleChange('organization_name', e.target.value)} placeholder="ระบุชื่อองค์กร" />
@@ -969,11 +831,10 @@ export default function UserManagementPage() {
                               <div className="space-y-1.5 sm:col-span-2">
                                   <label className="text-[13px] font-bold text-slate-600">สถานที่ตั้ง</label>
                                   <input id="field-organization_location" type="text" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-slate-400" value={formData.organization_location || ''} onChange={e => handleChange('organization_location', e.target.value)} placeholder="สถานที่ตั้งองค์กร (ถ้ามี)" />
->>>>>>> develop
                               </div>
                           </div>
-                      )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* บทบาทและสังกัด */}
                     <div className="bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100 space-y-5">
@@ -981,73 +842,29 @@ export default function UserManagementPage() {
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1.5">
-                              <label className="text-[13px] font-bold text-slate-600">ตำแหน่ง (Role) <span className="text-red-500">*</span></label>
-<<<<<<< HEAD
-                              <div className="relative">
-                                <select className="w-full bg-white border border-slate-300 rounded-lg pl-3 pr-10 py-2.5 text-sm focus:border-slate-400 outline-none transition-all font-bold text-slate-700 disabled:bg-slate-100 disabled:text-slate-400 appearance-none" value={formData.role_id || ''} onChange={e => handleRoleChange(e.target.value)} disabled={modalMode === 'edit'}>
-                                    <option value="" disabled>-- เลือกตำแหน่ง --</option>
-                                    {roles.map((r: any) => <option key={r.role_id} value={r.role_id}>{r.role_name_th}</option>)}
-                                </select>
-                                <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                              </div>
-                          </div>
-                          
-                          <div className="space-y-1.5">
-                              <label className="text-[13px] font-bold text-slate-600 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> วิทยาเขต <span className="text-red-500">*</span></label>
-                              <div className="relative">
-                                <select 
-                                  className="w-full bg-white border border-slate-300 rounded-lg pl-3 pr-10 py-2.5 text-sm focus:border-slate-400 outline-none transition-all font-medium appearance-none cursor-pointer" 
-                                  value={formData.campus_id || ''} 
-                                  onChange={e => setFormData({...formData, campus_id: Number(e.target.value)})}
-                                  >
-                                      <option value="" disabled>-- เลือกวิทยาเขต --</option>
-                                      {/* แก้ไขให้รองรับทั้ง campusID (API ใหม่) และ campus_id */}
-                                      {campuses.map((c: any) => (
-                                          <option key={c.campusID || c.campus_id} value={c.campusID || c.campus_id}>
-                                              {c.campusName || c.campus_name}
-                                          </option>
-                                      ))}
-                                  </select>
-                                <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                              </div>
-                          </div>
-                      </div>
-
-                      {/* เฉพาะ Committee (Role 6) - ประธาน */}
-                      {formData.role_id === 6 && (
-                          <div className="flex items-center gap-3 p-3 bg-teal-50/50 rounded-xl border border-teal-100">
-                              <input type="checkbox" id="is_chairman" checked={formData.is_chairman || false} onChange={e => setFormData({...formData, is_chairman: e.target.checked})} className="w-5 h-5 text-teal-600 rounded border-teal-300 focus:ring-teal-500" />
-=======
+                              <label className="text-[13px] font-bold text-slate-600">ตำแหน่ง<span className="text-red-500">*</span></label>
                               <FormSelect id="field-role_id" value={formData.role_id} onChange={handleRoleChange} options={formRoleOptions} placeholder="เลือกตำแหน่ง" disabled={modalMode === 'edit'} icon={Contact} error={formErrors.role_id} />
                               {formErrors.role_id && <p className="text-[11px] text-red-500 font-medium mt-1">{formErrors.role_id}</p>}
                           </div>
                           
                           <div className="space-y-1.5">
-                              <label className="text-[13px] font-bold text-slate-600">วิทยาเขต <span className="text-red-500">*</span></label>
-                              <FormSelect id="field-campus_id" value={formData.campus_id} onChange={(val: string) => handleChange('campus_id', Number(val))} options={campusOptions} placeholder="เลือกวิทยาเขต" icon={MapPin} error={formErrors.campus_id} />
-                              {formErrors.campus_id && <p className="text-[11px] text-red-500 font-medium mt-1">{formErrors.campus_id}</p>}
+                              <label className="text-[13px] font-bold text-slate-600">วิทยาเขต</label>
+                              <div className="w-full bg-slate-50 border border-slate-200 text-slate-600 rounded-lg px-3 py-2.5 text-sm font-bold flex items-center gap-2 outline-none">
+                                  <MapPin className="w-4 h-4 text-slate-400" />
+                                  {campuses.find((c: any) => (c.campusID || c.campus_id) === formData.campus_id)?.campusName || 
+                                   campuses.find((c: any) => (c.campusID || c.campus_id) === formData.campus_id)?.campus_name || 
+                                   "กำลังโหลด..."}
+                              </div>
                           </div>
                       </div>
 
                       {formData.role_id === 6 && (
                           <div className="flex items-center gap-3 p-3 bg-teal-50/50 rounded-xl border border-teal-100">
                               <input type="checkbox" id="is_chairman" checked={formData.is_chairman || false} onChange={e => handleChange('is_chairman', e.target.checked)} className="w-5 h-5 text-teal-600 rounded border-teal-300 focus:ring-teal-500" />
->>>>>>> develop
                               <label htmlFor="is_chairman" className="text-[13px] font-bold text-slate-700 cursor-pointer select-none">กำหนดเป็นประธานกรรมการ</label>
                           </div>
                       )}
 
-<<<<<<< HEAD
-                      {/* เฉพาะ Student (Role 1) - รหัสนิสิต */}
-                      {formData.role_id === 1 && (
-                          <div className="space-y-1.5">
-                              <label className="text-[13px] font-bold text-slate-600">รหัสนิสิต <span className="text-red-500">*</span></label>
-                              <input type="text" maxLength={10} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none font-mono placeholder-slate-300" value={formData.student_number || ''} onChange={e => setFormData({...formData, student_number: e.target.value.replace(/\D/g, "")})} placeholder="ตัวเลข 10 หลัก" />
-                          </div>
-                      )}
-
-                      {/* เฉพาะ Role 1, 2, 3, 4 - คณะและสาขา */}
-=======
                       {formData.role_id === 1 && (
                           <div className="space-y-1.5">
                               <label className="text-[13px] font-bold text-slate-600">รหัสนิสิต <span className="text-red-500">*</span></label>
@@ -1056,33 +873,10 @@ export default function UserManagementPage() {
                           </div>
                       )}
 
->>>>>>> develop
                       {[1, 2, 3, 4].includes(formData.role_id || 0) && (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                               <div className="space-y-1.5">
                                   <label className="text-[13px] font-bold text-slate-600">คณะ / สังกัดหลัก <span className="text-red-500">*</span></label>
-<<<<<<< HEAD
-                                  <div className="relative">
-                                    <select className="w-full bg-white border border-slate-300 rounded-lg pl-3 pr-10 py-2.5 text-sm focus:border-slate-400 outline-none transition-all font-medium appearance-none" value={formData.faculty_id || ''} onChange={e => setFormData({...formData, faculty_id: Number(e.target.value) || undefined, department_id: undefined})}>
-                                        <option value="">-- เลือกคณะ --</option>
-                                        {faculties.map((f: any) => <option key={f.faculty_id} value={f.faculty_id}>{f.faculty_name}</option>)}
-                                    </select>
-                                    <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                  </div>
-                              </div>
-
-                              {/* สาขาแสดงเฉพาะ Role 1, 2 */}
-                              {[1, 2].includes(formData.role_id || 0) && (
-                                  <div className="space-y-1.5">
-                                      <label className="text-[13px] font-bold text-slate-600">สาขา / ภาควิชา <span className="text-red-500">*</span></label>
-                                      <div className="relative">
-                                        <select className="w-full bg-white border border-slate-300 rounded-lg pl-3 pr-10 py-2.5 text-sm focus:border-slate-400 outline-none transition-all font-medium disabled:bg-slate-50 disabled:text-slate-400 appearance-none" value={formData.department_id || ''} onChange={e => setFormData({...formData, department_id: Number(e.target.value) || undefined})} disabled={!formData.faculty_id || visibleDepartments.length === 0}>
-                                            <option value="">-- เลือกสาขา --</option>
-                                            {visibleDepartments.map((d: any) => <option key={d.department_id} value={d.department_id}>{d.department_name}</option>)}
-                                        </select>
-                                        <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                      </div>
-=======
                                   <FormSelect id="field-faculty_id" value={formData.faculty_id} onChange={(val: string) => { handleChange('faculty_id', Number(val)); handleChange('department_id', undefined); }} options={facultyOptions} placeholder="-- เลือกคณะ --" error={formErrors.faculty_id} />
                                   {formErrors.faculty_id && <p className="text-[11px] text-red-500 font-medium mt-1">{formErrors.faculty_id}</p>}
                               </div>
@@ -1092,40 +886,24 @@ export default function UserManagementPage() {
                                       <label className="text-[13px] font-bold text-slate-600">สาขา / ภาควิชา <span className="text-red-500">*</span></label>
                                       <FormSelect id="field-department_id" value={formData.department_id} onChange={(val: string) => handleChange('department_id', Number(val))} options={departmentOptions} placeholder="-- เลือกสาขา --" disabled={!formData.faculty_id || visibleDepartments.length === 0} error={formErrors.department_id} />
                                       {formErrors.department_id && <p className="text-[11px] text-red-500 font-medium mt-1">{formErrors.department_id}</p>}
->>>>>>> develop
                                   </div>
                               )}
                           </div>
                       )}
                     </div>
 
-<<<<<<< HEAD
-                    {/* บัญชีเข้าใช้งานระบบ */}
-=======
                     {/* บัญชีระบบ */}
->>>>>>> develop
                     <div className="bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100 space-y-5">
                       <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Mail className="w-4 h-4 text-slate-400" /> บัญชีเข้าใช้งานระบบ</h4>
                       <div className="space-y-1.5">
                           <label className="text-[13px] font-bold text-slate-600">อีเมล <span className="text-red-500">*</span></label>
-<<<<<<< HEAD
-                          <input type="email" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none transition-all placeholder:text-slate-300" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="example@ku.th" />
-=======
                           <input id="field-email" type="email" className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none transition-all ${formErrors.email ? 'border-red-400 ring-2 ring-red-100 bg-red-50/30' : 'border-slate-300 focus:border-slate-400'}`} value={formData.email || ''} onChange={e => handleChange('email', e.target.value)} placeholder="example@ku.th" />
                           {formErrors.email && <p className="text-[11px] text-red-500 font-medium mt-1"><AlertCircle className="w-3 h-3 inline"/> {formErrors.email}</p>}
->>>>>>> develop
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1.5">
                               <label className="text-[13px] font-bold text-slate-600">รหัสผ่าน {modalMode === 'create' && <span className="text-red-500">*</span>}</label>
-<<<<<<< HEAD
-                              <input type="password" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none transition-all placeholder:text-slate-300" value={formData.password || ''} onChange={e => setFormData({...formData, password: e.target.value})} placeholder={modalMode === 'edit' ? "เว้นว่างไว้หากไม่เปลี่ยน" : "อย่างน้อย 6 ตัวอักษร"} />
-                          </div>
-                          <div className="space-y-1.5">
-                              <label className="text-[13px] font-bold text-slate-600">ยืนยันรหัสผ่าน {modalMode === 'create' && <span className="text-red-500">*</span>}</label>
-                              <input type="password" className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:border-slate-400 outline-none transition-all placeholder:text-slate-300" value={formData.confirm_password || ''} onChange={e => setFormData({...formData, confirm_password: e.target.value})} placeholder="กรอกรหัสผ่านอีกครั้ง" />
-=======
                               <input id="field-password" type="password" className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none transition-all ${formErrors.password ? 'border-red-400 ring-2 ring-red-100 bg-red-50/30' : 'border-slate-300 focus:border-slate-400'}`} value={formData.password || ''} onChange={e => handleChange('password', e.target.value)} placeholder={modalMode === 'edit' ? "เว้นว่างไว้หากไม่เปลี่ยน" : "อย่างน้อย 6 ตัวอักษร"} />
                               {formErrors.password && <p className="text-[11px] text-red-500 font-medium mt-1">{formErrors.password}</p>}
                           </div>
@@ -1133,7 +911,6 @@ export default function UserManagementPage() {
                               <label className="text-[13px] font-bold text-slate-600">ยืนยันรหัสผ่าน {modalMode === 'create' && <span className="text-red-500">*</span>}</label>
                               <input id="field-confirm_password" type="password" className={`w-full bg-white border rounded-lg px-3 py-2.5 text-sm outline-none transition-all ${formErrors.confirm_password ? 'border-red-400 ring-2 ring-red-100 bg-red-50/30' : 'border-slate-300 focus:border-slate-400'}`} value={formData.confirm_password || ''} onChange={e => handleChange('confirm_password', e.target.value)} placeholder="กรอกรหัสผ่านอีกครั้ง" />
                               {formErrors.confirm_password && <p className="text-[11px] text-red-500 font-medium mt-1">{formErrors.confirm_password}</p>}
->>>>>>> develop
                           </div>
                       </div>
                     </div>
@@ -1141,11 +918,7 @@ export default function UserManagementPage() {
                 </form>
 
                 {/* Footer Actions */}
-<<<<<<< HEAD
-                <div className="p-6 border-t border-slate-100 bg-white flex flex-col-reverse sm:flex-row justify-end gap-3 z-10 sticky bottom-0">
-=======
                 <div className="p-6 border-t border-slate-100 bg-white flex flex-col-reverse sm:flex-row justify-end gap-3 z-50 sticky bottom-0 rounded-b-[2rem]">
->>>>>>> develop
                     <button onClick={() => setIsModalOpen(false)} type="button" className="w-full sm:w-auto px-8 py-3 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors text-center">ยกเลิก</button>
                     <button form="userForm" type="submit" disabled={isSaving} className="w-full sm:w-auto px-10 py-3 text-sm font-bold text-white bg-slate-900 rounded-xl shadow-md hover:bg-black transition-all active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2">
                         {isSaving ? (
@@ -1159,6 +932,7 @@ export default function UserManagementPage() {
           </div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

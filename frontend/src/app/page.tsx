@@ -30,11 +30,6 @@ interface LoginResponse {
 // 1. Main Component
 // ==========================================
 
-<<<<<<< HEAD
-=======
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
-
->>>>>>> develop
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
@@ -55,11 +50,7 @@ export default function LoginPage() {
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
 
-<<<<<<< HEAD
     window.location.href = `/auth/google/login`;
-=======
-    window.location.href = `${API_BASE_URL}/auth/google/login`;
->>>>>>> develop
   };
 
   // เลื่อนหาฟังก์ชัน handleRedirect แล้วเปลี่ยนเป็นโค้ดนี้ครับ

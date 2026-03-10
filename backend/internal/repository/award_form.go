@@ -20,11 +20,8 @@ type AwardSearchFilter struct {
 	Date                 string
 	StudentYear          int
 	AwardType            string
-<<<<<<< HEAD
-=======
 	AwardTypes           []string
 	IsOtherAwardType     bool
->>>>>>> develop
 	ExcludeVotedByUserID *uint
 	FacultyID            *int
 	DepartmentID         *int
@@ -136,11 +133,28 @@ func (r *AwardRepository) GetByKeyword(ctx context.Context, filter AwardSearchFi
 
 	query := r.db.WithContext(ctx).Model(&models.AwardForm{}).Where("campus_id = ?", filter.CampusID)
 
-	// ค้นหาด้วย keyword (firstname, lastname, studentNumber, semester, year, award_type)
+	// ค้นหาด้วย keyword (รองรับชื่อ-นามสกุลแบบมี/ไม่มีช่องว่าง และสลับนามสกุลก่อน)
 	if filter.Keyword != "" {
+		keyword := strings.TrimSpace(filter.Keyword)
+		keywordNoSpace := strings.Join(strings.Fields(keyword), "")
+
 		query = query.Where(
-			"student_firstname LIKE ? OR student_lastname LIKE ? OR student_number LIKE ? OR CONCAT(student_firstname, ' ', student_lastname) LIKE ?",
-			"%"+filter.Keyword+"%", "%"+filter.Keyword+"%", "%"+filter.Keyword+"%", "%"+filter.Keyword+"%",
+			`LOWER(student_firstname) LIKE LOWER(?)
+			 OR LOWER(student_lastname) LIKE LOWER(?)
+			 OR LOWER(student_number) LIKE LOWER(?)
+			 OR LOWER(CONCAT(student_firstname, ' ', student_lastname)) LIKE LOWER(?)
+			 OR LOWER(CONCAT(student_firstname, student_lastname)) LIKE LOWER(?)
+			 OR LOWER(CONCAT(student_lastname, student_firstname)) LIKE LOWER(?)
+			 OR LOWER(REPLACE(CONCAT(student_firstname, student_lastname), ' ', '')) LIKE LOWER(?)
+			 OR LOWER(REPLACE(CONCAT(student_lastname, student_firstname), ' ', '')) LIKE LOWER(?)`,
+			"%"+keyword+"%",
+			"%"+keyword+"%",
+			"%"+keyword+"%",
+			"%"+keyword+"%",
+			"%"+keyword+"%",
+			"%"+keyword+"%",
+			"%"+keywordNoSpace+"%",
+			"%"+keywordNoSpace+"%",
 		)
 	}
 
@@ -154,10 +168,6 @@ func (r *AwardRepository) GetByKeyword(ctx context.Context, filter AwardSearchFi
 		query = query.Where("student_year = ?", filter.StudentYear)
 	}
 
-<<<<<<< HEAD
-	// กรองตามประเภทรางวัล (ถ้ามี)
-	if filter.AwardType != "" {
-=======
 	// กรองตามประเภทรางวัล (รองรับ single type และ grouped type)
 	if len(filter.AwardTypes) > 0 {
 		if filter.IsOtherAwardType {
@@ -166,7 +176,6 @@ func (r *AwardRepository) GetByKeyword(ctx context.Context, filter AwardSearchFi
 			query = query.Where("award_type IN ?", filter.AwardTypes)
 		}
 	} else if filter.AwardType != "" {
->>>>>>> develop
 		query = query.Where("award_type = ?", filter.AwardType)
 	}
 

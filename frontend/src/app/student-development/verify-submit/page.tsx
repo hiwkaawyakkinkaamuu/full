@@ -21,17 +21,6 @@ import NominationDetailModal from "@/components/Nomination-detail-modal";
 const USE_MOCK_DATA = false;
 const ITEMS_PER_PAGE = 6;
 
-<<<<<<< HEAD
-=======
-// สร้าง List ประเภทรางวัลแบบสำเร็จรูป (Hardcode) ตามที่ต้องการ สำหรับตัวกรอง
-const FIXED_AWARD_TYPES = [
-  "กิจกรรมนอกหลักสูตร",
-  "ความคิดสร้างสรรค์และนวัตกรรม",
-  "ความประพฤติดี",
-  "อื่นๆ"
-];
-
->>>>>>> develop
 // ==========================================
 // 1. Interfaces
 // ==========================================
@@ -79,11 +68,7 @@ export interface Nomination {
 }
 
 // ==========================================
-<<<<<<< HEAD
 // 2. Custom Dropdown — แก้ด้วย Portal
-=======
-// 2. Custom Dropdown
->>>>>>> develop
 // ==========================================
 
 const CustomAwardTypeDropdown = ({ value, onChange, options }: any) => {
@@ -204,10 +189,7 @@ export default function SDDVerifyPage() {
   const [faculties, setFaculties] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [campuses, setCampuses] = useState<any[]>([]);
-<<<<<<< HEAD
   const [awardTypes, setAwardTypes] = useState<string[]>([]);
-=======
->>>>>>> develop
 
   // Search & Filter & Sort
   const [searchTerm, setSearchTerm] = useState("");
@@ -221,27 +203,6 @@ export default function SDDVerifyPage() {
   const [editedAwardType, setEditedAwardType] = useState<string>("");
   
   // ==========================================
-<<<<<<< HEAD
-=======
-  // Helpers สำหรับ Sort ประเภทรางวัล
-  // ==========================================
-  
-  // 🌟 ฟังก์ชันจัดกลุ่ม Priority เพื่อใช้ในการ Sort ลำดับบนหัวตาราง
-  const getAwardGroupPriority = (awardName: string) => {
-    if (!awardName) return 4;
-    if (awardName.includes("กิจกรรมนอกหลักสูตร")) return 1;
-    if (awardName.includes("ความคิดสร้างสรรค์และนวัตกรรม")) return 2;
-    if (awardName.includes("ความประพฤติดี")) return 3;
-    return 4; // ประเภทอื่นๆ ไว้ล่างสุด
-  };
-
-  // เมื่อเปลี่ยน Dropdown หรือ Search ให้เด้งกลับมาหน้า 1 เสมอ
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterType]);
-
-  // ==========================================
->>>>>>> develop
   // Fetch Data
   // ==========================================
   useEffect(() => {
@@ -249,27 +210,17 @@ export default function SDDVerifyPage() {
 
     const fetchMasterData = async () => {
         try {
-<<<<<<< HEAD
             const [facRes, deptRes, campRes, typeRes] = await Promise.all([
                 api.get(`/faculty`),
                 api.get(`/department`),
                 api.get(`/campus`),
                 api.get(`/awards/types`)
-=======
-            const [facRes, deptRes, campRes] = await Promise.all([
-                api.get(`/faculty`),
-                api.get(`/department`),
-                api.get(`/campus`)
->>>>>>> develop
             ]);
             if(isMounted) {
                 setFaculties(facRes.data?.data || facRes.data || []);
                 setDepartments(deptRes.data?.data || deptRes.data || []);
                 setCampuses(campRes.data?.data || campRes.data || []);
-<<<<<<< HEAD
                 setAwardTypes(typeRes.data?.data || typeRes.data || []);
-=======
->>>>>>> develop
             }
         } catch (error) { console.error("Error fetching master data", error); }
     };
@@ -281,13 +232,7 @@ export default function SDDVerifyPage() {
 
         const params: Record<string, string> = { limit: "200" };
         if (searchTerm) params.keyword = searchTerm;
-<<<<<<< HEAD
         if (filterType !== "all") params.award_type = filterType;
-=======
-        
-        // ❌ นำการส่ง Filter ไปหลังบ้านออก เพื่อให้หน้าบ้านเป็นคนดักคำว่า "อื่นๆ" แทน
-        // ให้หลังบ้านดึงมาทั้งหมด 200 รายการ แล้วเราค่อยมา Filter ใน frontend เพื่อความแม่นยำ
->>>>>>> develop
 
         const response = await api.get(`/awards/search`, { params });
         
@@ -316,7 +261,6 @@ export default function SDDVerifyPage() {
     fetchMasterData();
     fetchData();
     return () => { isMounted = false; };
-<<<<<<< HEAD
   }, [searchTerm, filterType]);
 
   // ==========================================
@@ -327,62 +271,6 @@ export default function SDDVerifyPage() {
     
     if (sortConfig.key) {
       filtered.sort((a: any, b: any) => {
-=======
-  }, [searchTerm]); // 🌟 เปลี่ยนจากการดัก filterType มาดักแค่ searchTerm เวลายิง API
-
-  // ==========================================
-  // Logic & Filtering & Sorting (ทำที่ฝั่ง Frontend)
-  // ==========================================
-  const processedData = useMemo(() => {
-    let filtered = [...items]; 
-    
-    // 🌟 1. การกรองข้อมูลจาก Dropdown (Filter)
-    if (filterType !== "all") {
-        filtered = filtered.filter(item => {
-            const name = item.award_type_name || item.award_type || "";
-            
-            // เช็คว่าชื่อเข้าข่าย 3 ตัวหลักหรือไม่
-            const isActivity = name.includes("กิจกรรมนอกหลักสูตร");
-            const isCreative = name.includes("ความคิดสร้างสรรค์และนวัตกรรม");
-            const isGoodBehavior = name.includes("ความประพฤติดี");
-
-            // ถ้าผู้ใช้เลือกอันไหน ก็กรองอันนั้น
-            if (filterType === "กิจกรรมนอกหลักสูตร") return isActivity;
-            if (filterType === "ความคิดสร้างสรรค์และนวัตกรรม") return isCreative;
-            if (filterType === "ความประพฤติดี") return isGoodBehavior;
-            
-            // 🌟 พระเอกของงานนี้: ถ้าเลือก "อื่นๆ" จะต้อง "ไม่ใช่" 3 อย่างแรก
-            if (filterType === "อื่นๆ") {
-                return !isActivity && !isCreative && !isGoodBehavior;
-            }
-
-            return true;
-        });
-    }
-
-    // 🌟 2. การเรียงลำดับข้อมูลเมื่อกดที่หัวตาราง (Sort)
-    if (sortConfig.key) {
-      filtered.sort((a: any, b: any) => {
-        
-        // Custom Sorting สำหรับคอลัมน์ "ประเภทรางวัล"
-        if (sortConfig.key === 'award_type_name') {
-          const nameA = a.award_type_name || a.award_type || "";
-          const nameB = b.award_type_name || b.award_type || "";
-          
-          const priorityA = getAwardGroupPriority(nameA);
-          const priorityB = getAwardGroupPriority(nameB);
-
-          // ถ้า Priority ไม่เท่ากัน ให้เรียง 1->2->3->4
-          if (priorityA !== priorityB) {
-            return sortConfig.direction === 'asc' ? priorityA - priorityB : priorityB - priorityA;
-          }
-          // ถ้า Priority เท่ากัน (เช่น เป็น "อื่นๆ" เหมือนกัน) ให้เรียงตัวอักษรต่อ
-          if (nameA < nameB) return sortConfig.direction === 'asc' ? -1 : 1;
-          if (nameA > nameB) return sortConfig.direction === 'asc' ? 1 : -1;
-          return 0;
-        }
-
->>>>>>> develop
         let valA = sortConfig.key ? a[sortConfig.key] : '';
         let valB = sortConfig.key ? b[sortConfig.key] : '';
         
@@ -400,11 +288,7 @@ export default function SDDVerifyPage() {
       });
     }
     return filtered;
-<<<<<<< HEAD
   }, [items, sortConfig]);
-=======
-  }, [items, filterType, sortConfig]); // 🌟 นำข้อมูลมาคำนวณใหม่ทันทีที่ items, filterType หรือ sortConfig เปลี่ยน
->>>>>>> develop
 
   const totalPages = Math.ceil(processedData.length / ITEMS_PER_PAGE);
   const paginatedData = processedData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -462,10 +346,7 @@ export default function SDDVerifyPage() {
 
     if (result.isConfirmed) {
       try {
-<<<<<<< HEAD
         // อัปเดตสถานะเป็น 8 (อนุมัติโดยกองพัฒนานิสิต) ตาม DB ล่าสุด
-=======
->>>>>>> develop
         const originalType = selectedItem.award_type_name || selectedItem.award_type;
         if (editedAwardType !== originalType) {
             await api.put(`/awards/award-type/change/${selectedItem.form_id}`, {
@@ -539,11 +420,7 @@ export default function SDDVerifyPage() {
                   <CustomAwardTypeDropdown 
                       value={filterType} 
                       onChange={(val: string) => { setFilterType(val); setCurrentPage(1); }} 
-<<<<<<< HEAD
                       options={awardTypes} 
-=======
-                      options={FIXED_AWARD_TYPES} 
->>>>>>> develop
                   />
               </div>
             </div>
@@ -598,11 +475,7 @@ export default function SDDVerifyPage() {
                             style={{ opacity: 0, animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
                             onClick={() => { 
                               setSelectedItem(item); 
-<<<<<<< HEAD
                               setEditedAwardType(item.award_type_name || item.award_type); // + เพิ่มบรรทัดนี้
-=======
-                              setEditedAwardType(item.award_type_name || item.award_type || "-");
->>>>>>> develop
                               setIsModalOpen(true); 
                             }}
                         >
@@ -624,11 +497,7 @@ export default function SDDVerifyPage() {
                         </td>
                         <td className="p-6 text-center align-middle">
                             <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-slate-700 text-xs font-bold border border-slate-200 bg-white shadow-sm group-hover:border-blue-200 transition-colors">
-<<<<<<< HEAD
                             {item.award_type_name || item.award_type}
-=======
-                            {item.award_type_name || item.award_type || "-"}
->>>>>>> develop
                             </span>
                         </td>
                         <td className="p-6 text-center align-middle">
@@ -639,15 +508,7 @@ export default function SDDVerifyPage() {
                         </td>
                         <td className="p-6 text-center align-middle" onClick={(e) => e.stopPropagation()}>
                             <button 
-<<<<<<< HEAD
                                 onClick={() => { setSelectedItem(item); setIsModalOpen(true); }}
-=======
-                                onClick={() => { 
-                                    setSelectedItem(item); 
-                                    setEditedAwardType(item.award_type_name || item.award_type || "-");
-                                    setIsModalOpen(true); 
-                                }}
->>>>>>> develop
                                 className="bg-white hover:bg-blue-600 hover:text-white text-slate-600 border border-slate-200 hover:border-blue-600 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2 mx-auto"
                             >
                                 <Eye size={14} /> ตรวจสอบเอกสาร

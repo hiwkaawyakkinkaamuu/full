@@ -6,6 +6,9 @@ import { AlertCircle, Clock, XCircle, ChevronDown, Award, Edit3, CheckCircle2 } 
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/axios";
 
+// 🌟 Import useAuth เพื่อดึง Role ของคนที่กำลังดู Modal
+import { useAuth } from "@/context/AuthContext";
+
 // ==========================================
 // 1. Interfaces
 // ==========================================
@@ -75,6 +78,8 @@ interface ModalProps {
   canEditAwardType?: boolean;
   editedAwardType?: string;
   onAwardTypeChange?: (val: string) => void;
+  // 🌟 เพิ่ม Prop สำหรับบอกว่านี่คือการเปิดจากหน้า History หรือไม่
+  isHistoryView?: boolean; 
 }
 
 // ==========================================
@@ -270,9 +275,12 @@ export default function NominationDetailModal({
     data, 
     editedAwardType, 
     canEditAwardType,
-    onAwardTypeChange 
+    onAwardTypeChange,
+    isHistoryView = false // 🌟 Default เป็น false
 }: ModalProps) {
   
+  const { user } = useAuth(); // 🌟 ดึงข้อมูล user ปัจจุบัน
+
   const [facultyName, setFacultyName] = useState("-");
   const [deptName, setDepartmentName] = useState("-");
   const [campusName, setCampusName] = useState("-");
@@ -363,6 +371,10 @@ export default function NominationDetailModal({
 
   if (!isOpen || !data) return null;
 
+  // 🌟 เงื่อนไขตรวจสอบสิทธิ์ในการดูกล่องเหตุผลปฏิเสธ
+  const roleId = user?.role_id;
+  const canViewRejectReason = roleId === 1 || roleId === 8 || isHistoryView;
+
   // --- กำหนดประเภทและ Theme ---
   const awardStr = data.award_type || data.award_type_name || "";
   const isActivity = awardStr.includes("กิจกรรม");
@@ -434,8 +446,8 @@ export default function NominationDetailModal({
         {/* Body */}
         <div className="overflow-y-auto p-6 md:p-8 space-y-8 custom-scrollbar">
 
-            {/* กล่องแสดงเหตุผลการปฏิเสธ */}
-            {rejectedLogs.length > 0 && (
+            {/* 🌟 แสดงกล่องแสดงเหตุผลการปฏิเสธ เฉพาะเมื่อ canViewRejectReason เป็น true */}
+            {canViewRejectReason && rejectedLogs.length > 0 && (
                 <div className="space-y-4">
                     {rejectedLogs.map((log, index) => (
                         <div key={log.approval_log_id || index} className="bg-rose-50 border border-rose-200 p-6 md:p-8 rounded-[24px] shadow-sm relative overflow-hidden">
@@ -475,7 +487,6 @@ export default function NominationDetailModal({
                                 ประเภทรางวัล (กองพัฒนานิสิตสามารถแก้ไขได้)
                             </label>
                             
-                            {/* เรียกใช้งาน CustomSelect ที่เพิ่งสร้างใหม่ */}
                             <CustomSelect 
                                 value={selectedMainType} 
                                 onChange={(val: string) => {
@@ -495,7 +506,6 @@ export default function NominationDetailModal({
                             />
                         </div>
                         
-                        {/* ถ้าเลือกประเภทอื่นๆ ให้แสดงช่องกรอกข้อความที่สวยขึ้น */}
                         {selectedMainType === "ประเภทอื่นๆ" && (
                             <div className="animate-fade-in-up">
                                 <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">

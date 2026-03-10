@@ -95,15 +95,8 @@ func (s *userService) GetAllUsersByCampus(ctx context.Context, campusID int, pag
 	if campusID <= 0 {
 		return nil, errors.New("invalid campus id")
 	}
-	if page < 1 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 6
-	}
-	if limit > 6 {
-		limit = 6
-	}
+	
+	limit = 3000
 
 	users, err := s.repo.GetUserListByCampus(ctx, campusID, page, limit)
 	if err != nil {

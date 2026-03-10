@@ -29,6 +29,8 @@ type AuthService interface {
 	AuthenticateAndToken(ctx context.Context, email, password string) (string, *models.User, error)
 
 	GetUserByID(ctx context.Context, userID uint) (*models.User, error)
+	GetStudentByUserID(ctx context.Context, userID uint) (*models.Student, error)
+	GetOrganizationByUserID(ctx context.Context, userID uint) (*models.Organization, error)
 	GetHeadOfDepartmentByUserID(ctx context.Context, userID uint) (*models.HeadOfDepartment, error)
 	GetAssociateDeanByUserID(ctx context.Context, userID uint) (*models.AssociateDean, error)
 	GetDeanByUserID(ctx context.Context, userID uint) (*models.Dean, error)
@@ -446,6 +448,20 @@ func (u *authService) GetUserByID(ctx context.Context, userID uint) (*models.Use
 	return user, nil
 }
 
+func (u *authService) GetStudentByUserID(ctx context.Context, userID uint) (*models.Student, error) {
+	if u.studentRepo == nil {
+		return nil, errors.New("student repository not configured")
+	}
+	return u.studentRepo.GetByUserID(ctx, userID)
+}
+
+func (u *authService) GetOrganizationByUserID(ctx context.Context, userID uint) (*models.Organization, error) {
+	if u.orgRepo == nil {
+		return nil, errors.New("organization repository not configured")
+	}
+	return u.orgRepo.GetByUserID(ctx, userID)
+}
+
 func (u *authService) GetHeadOfDepartmentByUserID(ctx context.Context, userID uint) (*models.HeadOfDepartment, error) {
 	if u.roleRepo == nil {
 		return nil, errors.New("role repository not configured")
@@ -676,6 +692,7 @@ func (u *authService) CompleteFirstLogin(ctx context.Context, userID uint, req *
 		return nil, nil, errors.New("invalid role_id for first login")
 	}
 }
+
 // func validateStudentNumber(studentNumber string) error {
 // 	if len(studentNumber) != 10 {
 // 		return fmt.Errorf("student_number must be exactly 10 digits")

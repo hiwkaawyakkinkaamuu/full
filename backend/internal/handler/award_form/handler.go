@@ -43,7 +43,10 @@ func (h *AwardHandler) Submit(c *fiber.Ctx) error {
 		})
 	}
 	now := time.Now()
-	if now.Before(currentSemester.StartDate) || now.After(currentSemester.EndDate) {
+	startOfDay := time.Date(currentSemester.StartDate.Year(), currentSemester.StartDate.Month(), currentSemester.StartDate.Day(), 0, 0, 0, 0, now.Location())
+	endOfDay := time.Date(currentSemester.EndDate.Year(), currentSemester.EndDate.Month(), currentSemester.EndDate.Day(), 23, 59, 59, int(time.Second-time.Nanosecond), now.Location())
+
+	if now.Before(startOfDay) || now.After(endOfDay) {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"status":  "error",
 			"message": "ขณะนี้ไม่อยู่ในช่วงเวลาที่อนุญาตให้ส่งฟอร์ม (" + currentSemester.StartDate.Format("2006-01-02") + " ถึง " + currentSemester.EndDate.Format("2006-01-02") + ")",
@@ -931,7 +934,7 @@ func (h *AwardHandler) GetMyApprovalLogs(c *fiber.Ctx) error {
 		page = 1
 	}
 
-	const limit = 5
+	const limit = 3000
 
 	logs, err := h.useCase.GetApprovalHistory(
 		c.UserContext(),
@@ -1029,7 +1032,7 @@ func (h *AwardHandler) GetMyVoteLogs(c *fiber.Ctx) error {
 		page = 1
 	}
 
-	const limit = 5
+	const limit = 3000
 
 	logs, total, err := h.useCase.GetCommitteeVoteLogsByUserID(c.UserContext(), user.UserID, keyword, date, page, limit)
 	if err != nil {

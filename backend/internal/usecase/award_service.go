@@ -116,11 +116,7 @@ func (u *awardUseCase) SubmitAward(ctx context.Context, userID uint, input award
 		form.FacultyID = int(student.FacultyID)
 		form.DepartmentID = int(student.DepartmentID)
 		form.CampusID = student.User.CampusID
-<<<<<<< HEAD
-		
-=======
 
->>>>>>> develop
 		// Organization info ล้างเป็นค่าว่าง
 		form.OrgName = ""
 		form.OrgType = ""
@@ -182,7 +178,7 @@ func mapToAwardResponse(item models.AwardForm) awardformdto.AwardFormResponse {
 func (u *awardUseCase) GetByKeyword(ctx context.Context, userID uint, roleID int, campusID int, keyword string, date string, studentYear int, awardType string, sortBy string, sortOrder string, page int, limit int) (*awardformdto.PaginatedAwardResponse, error) {
 	// 1. 🚨 ลบ limit = 5 ที่ฮาร์ดโค้ดไว้ออก เพื่อให้ใช้ Limit จาก Frontend ได้
 	if limit == 0 {
-		limit = 5 // กันเหนียวกรณี Frontend ไม่ได้ส่ง limit มา
+		limit = 3000 // กันเหนียวกรณี Frontend ไม่ได้ส่ง limit มา
 	}
 
 	normalizedSortBy := normalizeSortBy(sortBy)
@@ -200,15 +196,6 @@ func (u *awardUseCase) GetByKeyword(ctx context.Context, userID uint, roleID int
 		Limit:       limit,
 	}
 
-<<<<<<< HEAD
-	// 2. 🚨 จัดการเรื่อง Status ตาม Role
-	if formStatusID, hasRequiredStatus := requiredFormStatusByRole(roleID); hasRequiredStatus {
-		
-		// 🚨 แก้ไขจุดสำคัญ: แยกการทำงานระหว่าง "ประธาน" กับ "กรรมการปกติ"
-		if roleID == 6 {
-			isChairman, _ := u.repo.IsCommitteeChairman(ctx, userID)
-			
-=======
 	if groupedTypes, isOther := mapAwardTypeSearchFilter(filter.AwardType); len(groupedTypes) > 0 {
 		filter.AwardTypes = groupedTypes
 		filter.IsOtherAwardType = isOther
@@ -221,7 +208,6 @@ func (u *awardUseCase) GetByKeyword(ctx context.Context, userID uint, roleID int
 		if roleID == 6 {
 			isChairman, _ := u.repo.IsCommitteeChairman(ctx, userID)
 
->>>>>>> develop
 			if isChairman {
 				// เคสประธาน: ดึงสถานะ 9 (รอลงนาม) และไม่ต้องซ่อนฟอร์มที่เคยโหวต
 				formStatusID = 9
@@ -230,11 +216,7 @@ func (u *awardUseCase) GetByKeyword(ctx context.Context, userID uint, roleID int
 				filter.ExcludeVotedByUserID = &userID
 			}
 		}
-<<<<<<< HEAD
-		
-=======
 
->>>>>>> develop
 		filter.FormStatusID = &formStatusID
 	}
 
@@ -315,8 +297,6 @@ func normalizeSortOrder(sortOrder string) string {
 	}
 }
 
-<<<<<<< HEAD
-=======
 func mapAwardTypeSearchFilter(awardType string) ([]string, bool) {
 	normalized := strings.TrimSpace(strings.ToLower(awardType))
 	if normalized == "" {
@@ -346,7 +326,6 @@ func mapAwardTypeSearchFilter(awardType string) ([]string, bool) {
 	}
 }
 
->>>>>>> develop
 func normalizeApprovalSortBy(sortBy string) string {
 	switch strings.ToLower(strings.TrimSpace(sortBy)) {
 	case "name":
@@ -872,203 +851,6 @@ func (u *awardUseCase) GetAwardTypeLogs(ctx context.Context, req awardformdto.Se
 }
 
 func (u *awardUseCase) GetAnnouncementAwards(ctx context.Context, campusID int, req awardformdto.AnnouncementAwardRequest) (*awardformdto.PaginatedAnnouncementAwardResponse, error) {
-<<<<<<< HEAD
-    if campusID == 0 {
-        return nil, errors.New("invalid campus id")
-    }
-
-    const sectionLimit = 1000
-
-    latestYear, latestSemester, topAwardTypes, err := u.repo.GetAnnouncementDefaults(ctx, campusID)
-    if err != nil {
-        return nil, err
-    }
-
-    academicYearOptions, err := u.repo.GetAnnouncementAcademicYears(ctx, campusID)
-    if err != nil {
-        return nil, err
-    }
-
-    selectedYear := req.AcademicYear
-    if selectedYear == 0 {
-        selectedYear = latestYear
-    }
-
-    semesterOptions, err := u.repo.GetAnnouncementSemesters(ctx, campusID, selectedYear)
-    if err != nil {
-        return nil, err
-    }
-
-    selectedSemester := req.Semester
-    if selectedSemester == 0 {
-        if selectedYear == latestYear {
-            selectedSemester = latestSemester
-        } else if len(semesterOptions) > 0 {
-            selectedSemester = semesterOptions[0]
-        }
-    }
-
-    const fixedSortBy = "name"
-    const fixedSortOrder = "asc"
-
-    fixedCategoryTypes := []string{
-        "กิจกรรมนอกหลักสูตร",
-        "ด้านกิจกรรมเสริมหลักสูตร",
-        "ความคิดสร้างสรรค์และนวัตกรรม",
-        "ด้านความคิดสร้างสรรค์และนวัตกรรม",
-        "ความประพฤติดี",
-        "ด้านประพฤติดี",
-    }
-
-    type sectionConfig struct {
-        key         string
-        label       string
-        keyword     string
-        page        int
-        awardTypes  []string
-        isOtherType bool
-    }
-
-    sectionsCfg := []sectionConfig{
-        {
-            key:        "extracurricular",
-            label:      "กิจกรรมนอกหลักสูตร",
-            keyword:    strings.TrimSpace(req.KeywordExtracurricular),
-            page:       req.PageExtracurricular,
-            awardTypes: []string{"กิจกรรมนอกหลักสูตร", "ด้านกิจกรรมเสริมหลักสูตร"},
-        },
-        {
-            key:        "creativity",
-            label:      "ความคิดสร้างสรรค์และนวัตกรรม",
-            keyword:    strings.TrimSpace(req.KeywordCreativity),
-            page:       req.PageCreativity,
-            awardTypes: []string{"ความคิดสร้างสรรค์และนวัตกรรม", "ด้านความคิดสร้างสรรค์และนวัตกรรม"},
-        },
-        {
-            key:        "behavior",
-            label:      "ความประพฤติดี",
-            keyword:    strings.TrimSpace(req.KeywordBehavior),
-            page:       req.PageBehavior,
-            awardTypes: []string{"ความประพฤติดี", "ด้านประพฤติดี"},
-        },
-        {
-            key:         "other",
-            label:       "อื่นๆ",
-            keyword:     strings.TrimSpace(req.KeywordOther),
-            page:        req.PageOther,
-            awardTypes:  fixedCategoryTypes,
-            isOtherType: true,
-        },
-    }
-
-    sections := make([]awardformdto.AnnouncementAwardSection, 0, len(sectionsCfg))
-    allData := make([]awardformdto.AnnouncementAwardItem, 0)
-    var allTotal int64
-
-    for _, section := range sectionsCfg {
-        sectionKeyword := section.keyword
-
-        sectionPage := section.page
-        if sectionPage < 1 {
-            sectionPage = 1
-        }
-
-        filter := repository.AnnouncementFilter{
-            CampusID:     campusID,
-            Keyword:      sectionKeyword,
-            AcademicYear: selectedYear,
-            Semester:     selectedSemester,
-            FacultyID:    0,
-            Page:         sectionPage,
-            Limit:        sectionLimit,
-            SortBy:       fixedSortBy,
-            SortOrder:    fixedSortOrder,
-        }
-
-        rows, total, fetchErr := u.repo.GetAnnouncementAwardsByCategory(ctx, filter, section.awardTypes, section.isOtherType)
-        if fetchErr != nil {
-            return nil, fetchErr
-        }
-
-        totalPages := int(total) / sectionLimit
-        if int(total)%sectionLimit > 0 {
-            totalPages++
-        }
-        if totalPages == 0 {
-            totalPages = 1
-        }
-
-        sectionData := make([]awardformdto.AnnouncementAwardItem, 0, len(rows))
-        for _, row := range rows {
-            sectionData = append(sectionData, awardformdto.AnnouncementAwardItem{
-                FormID:           row.FormID,
-                CampusID:         row.CampusID,
-                AcademicYear:     row.AcademicYear,
-                Semester:         row.Semester,
-                AwardType:        row.AwardType,
-                AwardTypeGroup:   section.label,
-                FacultyID:        row.FacultyID,
-                FacultyName:      row.FacultyName,
-                StudentNumber:    row.StudentNumber,
-                Prefix:           row.Prefix,
-                StudentFirstname: row.StudentFirstname,
-                StudentLastname:  row.StudentLastname,
-                DisplayName:      strings.TrimSpace(strings.TrimSpace(row.Prefix) + " " + strings.TrimSpace(row.StudentFirstname) + " " + strings.TrimSpace(row.StudentLastname)),
-            })
-        }
-
-        sections = append(sections, awardformdto.AnnouncementAwardSection{
-            Key:     section.key,
-            Label:   section.label,
-            Keyword: sectionKeyword,
-            Data:    sectionData,
-            Pagination: awardformdto.PaginationMeta{
-                CurrentPage: sectionPage,
-                TotalPages:  totalPages,
-                TotalItems:  total,
-                Limit:       sectionLimit,
-            },
-        })
-
-        allData = append(allData, sectionData...)
-        allTotal += total
-    }
-
-    awardTypeOptions := make([]awardformdto.AwardTypeOption, 0, len(topAwardTypes)+1)
-    for _, awardType := range topAwardTypes {
-        awardTypeOptions = append(awardTypeOptions, awardformdto.AwardTypeOption{
-            Label: awardType,
-            Value: awardType,
-        })
-    }
-
-    awardTypeOptions = append(awardTypeOptions, awardformdto.AwardTypeOption{
-        Label:   "ประเภทอื่นๆ",
-        Value:   "ประเภทอื่นๆ",
-        IsOther: true,
-    })
-
-    return &awardformdto.PaginatedAnnouncementAwardResponse{
-        Data: allData,
-        Pagination: awardformdto.PaginationMeta{
-            CurrentPage: 1,
-            TotalPages:  1,
-            TotalItems:  allTotal,
-            Limit:       len(allData),
-        },
-        Filters: awardformdto.AnnouncementAwardFilterMeta{
-            AcademicYear:     selectedYear,
-            AcademicYears:    academicYearOptions,
-            Semester:         selectedSemester,
-            Semesters:        semesterOptions,
-            AwardType:        "",
-            FacultyID:        0,
-            Keyword:          "",
-            AwardTypeOptions: awardTypeOptions,
-        },
-        Sections: sections,
-    }, nil
-=======
 	if campusID == 0 {
 		return nil, errors.New("invalid campus id")
 	}
@@ -1264,7 +1046,6 @@ func (u *awardUseCase) GetAnnouncementAwards(ctx context.Context, campusID int, 
 		},
 		Sections: sections,
 	}, nil
->>>>>>> develop
 }
 
 func (u *awardUseCase) GetApprovalHistory(ctx context.Context, userID uint, campusID int, keyword string, date string, operation string, sortBy string, sortOrder string, page int, limit int) (*awardformdto.PaginatedApprovalLogResponse, error) {
@@ -1277,12 +1058,9 @@ func (u *awardUseCase) GetApprovalHistory(ctx context.Context, userID uint, camp
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 {
-		limit = 5
-	}
-	if limit > 5 {
-		limit = 5
-	}
+	
+	
+	limit = 3000
 
 	filter := repository.ApprovalLogSearchFilter{
 		UserID:    userID,
@@ -1352,15 +1130,8 @@ func (u *awardUseCase) GetCommitteeVoteLogsByUserID(ctx context.Context, userID 
 	if userID == 0 {
 		return nil, 0, errors.New("invalid user id")
 	}
-	if page < 1 {
-		page = 1
-	}
-	if limit < 1 {
-		limit = 5
-	}
-	if limit > 5 {
-		limit = 5
-	}
+	
+	limit = 3000
 
 	return u.repo.GetCommitteeVoteLogsByUserID(ctx, repository.CommitteeVoteLogSearchFilter{
 		UserID:  userID,
@@ -1377,8 +1148,4 @@ func (u *awardUseCase) GetApprovalLogDetail(ctx context.Context, approvalLogID u
 		return nil, errors.New("invalid approval log id")
 	}
 	return u.repo.GetApprovalLogByID(ctx, approvalLogID)
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> develop

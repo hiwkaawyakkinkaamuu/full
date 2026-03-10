@@ -77,27 +77,6 @@ const modalVariants: Variants = {
   exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
 };
 
-<<<<<<< HEAD
-=======
-// 🌟 ตั้งค่า List Dropdown แบบตายตัว (Hardcode) ไว้ที่หน้าบ้าน
-const awardTypeOptions = [
-  { v: "all", l: "ทุกประเภทรางวัล" },
-  { v: "กิจกรรมนอกหลักสูตร", l: "กิจกรรมนอกหลักสูตร" },
-  { v: "ความคิดสร้างสรรค์และนวัตกรรม", l: "ความคิดสร้างสรรค์และนวัตกรรม" },
-  { v: "ความประพฤติดี", l: "ความประพฤติดี" },
-  { v: "อื่นๆ", l: "อื่นๆ" }
-];
-
-const yearOptions = [
-  { v: "all", l: "ทุกระดับชั้นปี" },
-  { v: "1", l: "ชั้นปีที่ 1" },
-  { v: "2", l: "ชั้นปีที่ 2" },
-  { v: "3", l: "ชั้นปีที่ 3" },
-  { v: "4", l: "ชั้นปีที่ 4" },
-  { v: "5", l: "ชั้นปีที่ 5+" }
-];
-
->>>>>>> develop
 // Custom Dropdown Component
 const CustomSelect = ({ value, onChange, options, icon: Icon, placeholder, className = "" }: any) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -155,7 +134,6 @@ const CustomSelect = ({ value, onChange, options, icon: Icon, placeholder, class
     );
 };
 
-<<<<<<< HEAD
 const AWARD_CATEGORIES = [
   { v: "all", l: "ทุกประเภทรางวัล" },
   { v: "กิจกรรม", l: "กิจกรรมเสริมหลักสูตร" },
@@ -306,8 +284,6 @@ function CustomDatePicker({ value, onChange, label, disabled }: any) {
   );
 }
 
-=======
->>>>>>> develop
 // ==========================================
 // 2. Main Component
 // ==========================================
@@ -316,10 +292,7 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
   // --- States ---
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Nomination[]>([]);
-<<<<<<< HEAD
   const [awardTypes, setAwardTypes] = useState<string[]>([]);
-=======
->>>>>>> develop
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // Modals
@@ -334,10 +307,7 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
   const [filterYear, setFilterYear] = useState("all");
   const [filterDate, setFilterDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-<<<<<<< HEAD
   // เรียงวันที่ยื่นล่าสุด (created_at) เสมอเป็น Default
-=======
->>>>>>> develop
   const [sortConfig, setSortConfig] = useState<{ key: keyof Nomination | 'award_type_name' | null, direction: 'asc' | 'desc' | null }>({ key: 'created_at', direction: 'desc' });
 
   useEffect(() => {
@@ -351,24 +321,11 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
     return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute:'2-digit' });
   };
 
-<<<<<<< HEAD
-=======
-  // 🌟 ฟังก์ชันจัดกลุ่ม Priority เพื่อใช้ในการ Sort 
-  const getAwardGroupPriority = (awardName: string) => {
-    if (!awardName) return 4;
-    if (awardName.includes("กิจกรรมนอกหลักสูตร")) return 1;
-    if (awardName.includes("ความคิดสร้างสรรค์และนวัตกรรม")) return 2;
-    if (awardName.includes("ความประพฤติดี")) return 3;
-    return 4; // อื่นๆ (ไม่เข้าข่าย 3 อย่างแรก)
-  };
-
->>>>>>> develop
   // ==========================================
   // 3. Data Fetching
   // ==========================================
   useEffect(() => {
     let isMounted = true;
-<<<<<<< HEAD
     
     const fetchAwardTypes = async () => {
       try {
@@ -379,18 +336,12 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
         console.error("Error fetching award types:", error);
       }
     };
-=======
->>>>>>> develop
 
     const fetchData = async () => {
       setLoading(true);
       try {
         if (USE_MOCK_DATA) return;
 
-<<<<<<< HEAD
-=======
-        // ไม่ส่ง filter ไป API เพื่อให้ดึงข้อมูลทั้งหมดมาคัดกรองที่หน้าบ้าน (แก้ปัญหา Backend ไม่รู้จักคำว่า "อื่นๆ")
->>>>>>> develop
         const response = await api.get(`/awards/search`, { params: { limit: 1000 } });
         const rawData = response.data?.data || response.data;
         const fetchedData = Array.isArray(rawData) ? rawData : [];
@@ -406,11 +357,7 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
             };
         });
 
-<<<<<<< HEAD
         // 🚨 กรองเอาเฉพาะ "สถานะ 8: อนุมัติโดยกองพัฒนานิสิต" เพื่อให้คณะกรรมการพิจารณา
-=======
-        // กรองเอาเฉพาะ "สถานะ 8: อนุมัติโดยกองพัฒนานิสิต" เพื่อให้คณะกรรมการพิจารณา
->>>>>>> develop
         const TARGET_STATUS_ID = 8; 
         const pendingCommitteeForms = mappedData.filter((item: any) => item.form_status_id === TARGET_STATUS_ID);
 
@@ -425,29 +372,17 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
       }
     };
 
-<<<<<<< HEAD
     fetchAwardTypes();
-=======
->>>>>>> develop
     fetchData();
     return () => { isMounted = false; };
   }, []);
 
   // ==========================================
-<<<<<<< HEAD
   // 4. Filtering & Sorting Logic
   // ==========================================
   const processedData = useMemo(() => {
     let filtered = items;
 
-=======
-  // 4. Filtering & Sorting Logic (หน้าบ้าน)
-  // ==========================================
-  const processedData = useMemo(() => {
-    let filtered = [...items];
-
-    // --- Text Search ---
->>>>>>> develop
     if (searchTerm) {
         const lowerTerm = searchTerm.toLowerCase();
         filtered = filtered.filter(item => 
@@ -457,41 +392,14 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
         );
     }
 
-<<<<<<< HEAD
     if (filterCategory && filterCategory !== "all") {
         filtered = filtered.filter(item => item.award_type_name === filterCategory);
     }
 
-=======
-    // --- 🌟 Category Filter ---
-    if (filterCategory && filterCategory !== "all") {
-        filtered = filtered.filter(item => {
-            const name = item.award_type_name || item.award_type || "";
-            const isActivity = name.includes("กิจกรรมนอกหลักสูตร");
-            const isCreative = name.includes("ความคิดสร้างสรรค์และนวัตกรรม");
-            const isGoodBehavior = name.includes("ความประพฤติดี");
-
-            if (filterCategory === "กิจกรรมนอกหลักสูตร") return isActivity;
-            if (filterCategory === "ความคิดสร้างสรรค์และนวัตกรรม") return isCreative;
-            if (filterCategory === "ความประพฤติดี") return isGoodBehavior;
-            
-            // ถ้าเลือก "อื่นๆ" ต้องไม่ใช่ 3 ประเภทข้างบน
-            if (filterCategory === "อื่นๆ") return !isActivity && !isCreative && !isGoodBehavior;
-
-            return true;
-        });
-    }
-
-    // --- Year Filter ---
->>>>>>> develop
     if (filterYear && filterYear !== "all") {
         filtered = filtered.filter(item => String(item.student_year) === filterYear);
     }
 
-<<<<<<< HEAD
-=======
-    // --- Date Filter ---
->>>>>>> develop
     if (filterDate) {
         const filterTime = new Date(filterDate).setHours(23, 59, 59, 999);
         filtered = filtered.filter(item => {
@@ -500,32 +408,8 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
         });
     }
     
-<<<<<<< HEAD
     if (sortConfig.key) {
       filtered.sort((a: any, b: any) => {
-=======
-    // --- 🌟 Sort Data ---
-    if (sortConfig.key) {
-      filtered.sort((a: any, b: any) => {
-
-        // จัดเรียงประเภทรางวัลตาม Priority (1, 2, 3, 4)
-        if (sortConfig.key === 'award_type_name') {
-            const nameA = a.award_type_name || a.award_type || "";
-            const nameB = b.award_type_name || b.award_type || "";
-            
-            const priorityA = getAwardGroupPriority(nameA);
-            const priorityB = getAwardGroupPriority(nameB);
-  
-            if (priorityA !== priorityB) {
-              return sortConfig.direction === 'asc' ? priorityA - priorityB : priorityB - priorityA;
-            }
-            if (nameA < nameB) return sortConfig.direction === 'asc' ? -1 : 1;
-            if (nameA > nameB) return sortConfig.direction === 'asc' ? 1 : -1;
-            return 0;
-        }
-
-        // จัดเรียงคอลัมน์อื่นๆ
->>>>>>> develop
         let valA = sortConfig.key ? a[sortConfig.key] : '';
         let valB = sortConfig.key ? b[sortConfig.key] : '';
         if (sortConfig.key === 'student_firstname') {
@@ -535,10 +419,6 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
           valA = new Date(a.created_at).getTime();
           valB = new Date(b.created_at).getTime();
         }
-<<<<<<< HEAD
-=======
-
->>>>>>> develop
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
@@ -563,10 +443,7 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
   };
 
   // 🚨 API สำหรับการส่งผล (คณะกรรมการ)
-<<<<<<< HEAD
   // ให้คง API นี้ไว้ตามเดิม แต่ส่งค่าแบบที่ Go รอรับ
-=======
->>>>>>> develop
   const submitVote = async (id: number, isApproved: boolean, reason: string, studentName: string) => {
     try {
       if (!USE_MOCK_DATA) {
@@ -622,7 +499,6 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
     }
   };
 
-<<<<<<< HEAD
   const awardTypeOptions = [
     { v: "all", l: "ทุกประเภทรางวัล" },
     ...awardTypes.map(type => ({ v: type, l: type }))
@@ -637,8 +513,6 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
     { v: "5", l: "ชั้นปีที่ 5+" }
   ];
 
-=======
->>>>>>> develop
   return (
     <div className="min-h-screen bg-transparent p-6 pt-24 lg:p-10 lg:pt-28 font-sans pb-24 relative overflow-hidden">
       
@@ -760,10 +634,7 @@ export default function StudentDevelopmentCommitteeApprovalPage() {
                                <div className={`font-extrabold text-[15px] transition-colors ${selectedId === item.form_id ? 'text-indigo-700' : 'text-slate-800'}`}>{fullName}</div>
                             </div>
                           </td>
-<<<<<<< HEAD
                           {/* แก้ไขส่วนที่ซ่อนรหัสนิสิต ให้แสดงค่าเสมอ */}
-=======
->>>>>>> develop
                           <td className="p-6 text-center align-middle font-mono text-slate-600">
                               {item.student_number || "-"}
                           </td>

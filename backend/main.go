@@ -89,10 +89,6 @@ func main() {
 	// 3. ตั้งค่า Fiber App
 	app := fiber.New(fiber.Config{
 		AppName: "Backend JA",
-<<<<<<< HEAD
-=======
-		BodyLimit: 10 * 1024 * 1024, // 10 MB
->>>>>>> develop
 	})
 
 	// 4. ตั้งค่า Routes (ส่ง db เข้าไปเชื่อมต่อกับ Repository/Usecase/Handler)

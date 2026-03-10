@@ -9,10 +9,6 @@ import { api } from "@/lib/axios";
 // ==========================================
 // 0. Configuration & Service Layer
 // ==========================================
-<<<<<<< HEAD
-=======
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
->>>>>>> develop
 
 const authService = {
   register: async (email: string, password: string) => {
@@ -32,11 +28,7 @@ const authService = {
     }
   },
   googleLogin: () => {
-<<<<<<< HEAD
     window.location.href = `/auth/google/login`;
-=======
-    window.location.href = `${API_BASE_URL}/auth/google/login`;
->>>>>>> develop
   },
 };
 

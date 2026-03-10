@@ -142,22 +142,14 @@ const nominationService = {
 
   submitNomination: async (token: string, formData: FormData) => {
     const response = await api.post(`/awards/submit`, formData, {
-<<<<<<< HEAD
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-=======
-      headers: { Authorization: `Bearer ${token}` },
->>>>>>> develop
     });
     return response.data;
   },
 };
 
 // ==========================================
-<<<<<<< HEAD
 // 🌟 Premium Birth Date Picker Component
-=======
-// Premium Birth Date Picker Component
->>>>>>> develop
 // ==========================================
 const MONTH_NAMES = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 const DAY_NAMES = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];

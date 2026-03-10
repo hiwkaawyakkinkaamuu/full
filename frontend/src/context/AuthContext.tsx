@@ -89,11 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // 3. มี Token -> ยืนยันกับ Backend
       try {
-<<<<<<< HEAD
         const res = await api.get(`${API_BASE_URL}/auth/me`);
-=======
-        const res = await api.get(`/auth/me`);
->>>>>>> develop
         if (res.data) {
           const userData = res.data.user || res.data;
           setUser({ ...userData, token });

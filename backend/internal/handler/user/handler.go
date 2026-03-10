@@ -52,6 +52,31 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 	}
 
 	if h.AuthService != nil {
+		if user.RoleID == 1 {
+			student, err := h.AuthService.GetStudentByUserID(c.Context(), user.UserID)
+			if err == nil && student != nil {
+				response.StudentData = &authDto.StudentMeData{
+					StudentID:     student.StudentID,
+					StudentNumber: student.StudentNumber,
+					FacultyID:     student.FacultyID,
+					DepartmentID:  student.DepartmentID,
+				}
+			}
+		}
+
+		if user.RoleID == 8 {
+			org, err := h.AuthService.GetOrganizationByUserID(c.Context(), user.UserID)
+			if err == nil && org != nil {
+				response.OrganizationData = &authDto.OrganizationMeData{
+					OrganizationID:       org.OrganizationID,
+					OrganizationName:     org.OrganizationName,
+					OrganizationType:     org.OrganizationType,
+					OrganizationLocation: org.OrganizationLocation,
+					OrganizationPhone:    org.OrganizationPhoneNumber,
+				}
+			}
+		}
+
 		if user.RoleID == 2 {
 			hod, err := h.AuthService.GetHeadOfDepartmentByUserID(c.Context(), user.UserID)
 			if err == nil && hod != nil {
@@ -129,16 +154,16 @@ func (h *UserHandler) GetAllUsersByCampus(c *fiber.Ctx) error {
 	if page < 1 {
 		page = 1
 	}
-	const limit = 6
+	const limit = 3000
 
 	users, err := h.UserService.GetAllUsersByCampus(c.Context(), currentUser.CampusID, page, limit)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	var responses []userdto.UserResponse
+	var responses []authDto.MeResponse
 	for _, user := range users {
-		responses = append(responses, userdto.UserResponse{
+		resp := authDto.MeResponse{
 			UserID:       user.UserID,
 			Prefix:       user.Prefix,
 			Firstname:    user.Firstname,
@@ -151,7 +176,102 @@ func (h *UserHandler) GetAllUsersByCampus(c *fiber.Ctx) error {
 			IsFirstLogin: user.IsFirstLogin,
 			CreatedAt:    user.CreatedAt,
 			LatestUpdate: user.LatestUpdate,
-		})
+		}
+
+		if h.AuthService != nil {
+			if user.RoleID == 1 {
+				student, err := h.AuthService.GetStudentByUserID(c.Context(), user.UserID)
+				if err == nil && student != nil {
+					resp.StudentData = &authDto.StudentMeData{
+						StudentID:     student.StudentID,
+						StudentNumber: student.StudentNumber,
+						FacultyID:     student.FacultyID,
+						DepartmentID:  student.DepartmentID,
+					}
+				}
+			}
+
+			if user.RoleID == 8 {
+				org, err := h.AuthService.GetOrganizationByUserID(c.Context(), user.UserID)
+				if err == nil && org != nil {
+					resp.OrganizationData = &authDto.OrganizationMeData{
+						OrganizationID:       org.OrganizationID,
+						OrganizationName:     org.OrganizationName,
+						OrganizationType:     org.OrganizationType,
+						OrganizationLocation: org.OrganizationLocation,
+						OrganizationPhone:    org.OrganizationPhoneNumber,
+					}
+				}
+			}
+
+			if user.RoleID == 2 {
+				hod, err := h.AuthService.GetHeadOfDepartmentByUserID(c.Context(), user.UserID)
+				if err == nil && hod != nil {
+					resp.HeadOfDepartmentData = &authDto.HeadOfDepartmentMeData{
+						HodID:        hod.HodID,
+						UserID:       hod.UserID,
+						FacultyID:    hod.FacultyID,
+						DepartmentID: hod.DepartmentID,
+					}
+				}
+			}
+
+			if user.RoleID == 3 {
+				ad, err := h.AuthService.GetAssociateDeanByUserID(c.Context(), user.UserID)
+				if err == nil && ad != nil {
+					resp.AssociateDeanData = &authDto.AssociateDeanMeData{
+						AdID:      ad.AdID,
+						UserID:    ad.UserID,
+						AdCode:    ad.AdCode,
+						FacultyID: ad.FacultyID,
+					}
+				}
+			}
+
+			if user.RoleID == 4 {
+				dean, err := h.AuthService.GetDeanByUserID(c.Context(), user.UserID)
+				if err == nil && dean != nil {
+					resp.DeanData = &authDto.DeanMeData{
+						DID:       dean.DID,
+						UserID:    dean.UserID,
+						FacultyID: dean.FacultyID,
+					}
+				}
+			}
+
+			if user.RoleID == 5 {
+				sd, err := h.AuthService.GetStudentDevelopmentByUserID(c.Context(), user.UserID)
+				if err == nil && sd != nil {
+					resp.StudentDevelopmentData = &authDto.StudentDevelopmentMeData{
+						SdID:   sd.SdID,
+						UserID: sd.UserID,
+					}
+				}
+			}
+
+			if user.RoleID == 6 {
+				com, err := h.AuthService.GetCommitteeByUserID(c.Context(), user.UserID)
+				if err == nil && com != nil {
+					resp.CommitteeData = &authDto.CommitteeMeData{
+						ComID:      com.ComID,
+						UserID:     com.UserID,
+						IsChairman: com.IsChairman,
+					}
+				}
+			}
+
+			if user.RoleID == 7 {
+				ch, err := h.AuthService.GetChancellorByUserID(c.Context(), user.UserID)
+				if err == nil && ch != nil {
+					resp.ChancellorData = &authDto.ChancellorMeData{
+						ChancellorID: ch.ChancellorID,
+						UserID:       ch.UserID,
+					}
+				}
+			}
+		}
+
+		responses = append(responses, resp)
 	}
 
 	return c.JSON(fiber.Map{
